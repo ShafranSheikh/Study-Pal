@@ -15,7 +15,7 @@ struct LoginView: View {
                         // If you have the image, uncomment the line below:
                         // Image("pattern").resizable(resizingMode: .tile).opacity(0.1)
                     }
-                    .frame(height: proxy.size.height * 0.3)
+                    .frame(height: proxy.size.height * 0.5)
 
                     // Bottom Section (70% height) spacer to preserve existing structure
                     Spacer(minLength: 0)
