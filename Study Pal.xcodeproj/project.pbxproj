@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C85890FB2F809BAA004560CB /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = C85890FA2F809BAA004560CB /* FirebaseAI */; };
+		C85890FD2F809BAA004560CB /* FirebaseAILogic in Frameworks */ = {isa = PBXBuildFile; productRef = C85890FC2F809BAA004560CB /* FirebaseAILogic */; };
+		C85890FF2F809BAA004560CB /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C85890FE2F809BAA004560CB /* FirebaseAuth */; };
+		C85891012F809BAA004560CB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C85891002F809BAA004560CB /* FirebaseCore */; };
+		C85891032F809BAA004560CB /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = C85891022F809BAA004560CB /* FirebaseDatabase */; };
+		C85891052F809BAA004560CB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C85891042F809BAA004560CB /* FirebaseFirestore */; };
+		C85891072F809BAA004560CB /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C85891062F809BAA004560CB /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C80F556E2F7A1A9E00B69D6B /* Study Pal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Study Pal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +33,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C85891032F809BAA004560CB /* FirebaseDatabase in Frameworks */,
+				C85890FD2F809BAA004560CB /* FirebaseAILogic in Frameworks */,
+				C85890FF2F809BAA004560CB /* FirebaseAuth in Frameworks */,
+				C85891012F809BAA004560CB /* FirebaseCore in Frameworks */,
+				C85891072F809BAA004560CB /* FirebaseStorage in Frameworks */,
+				C85890FB2F809BAA004560CB /* FirebaseAI in Frameworks */,
+				C85891052F809BAA004560CB /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +82,13 @@
 			);
 			name = "Study Pal";
 			packageProductDependencies = (
+				C85890FA2F809BAA004560CB /* FirebaseAI */,
+				C85890FC2F809BAA004560CB /* FirebaseAILogic */,
+				C85890FE2F809BAA004560CB /* FirebaseAuth */,
+				C85891002F809BAA004560CB /* FirebaseCore */,
+				C85891022F809BAA004560CB /* FirebaseDatabase */,
+				C85891042F809BAA004560CB /* FirebaseFirestore */,
+				C85891062F809BAA004560CB /* FirebaseStorage */,
 			);
 			productName = "Study Pal";
 			productReference = C80F556E2F7A1A9E00B69D6B /* Study Pal.app */;
@@ -94,6 +118,9 @@
 			);
 			mainGroup = C80F55652F7A1A9E00B69D6B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C80F556F2F7A1A9E00B69D6B /* Products */;
 			projectDirPath = "";
@@ -345,6 +372,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C85890FA2F809BAA004560CB /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		C85890FC2F809BAA004560CB /* FirebaseAILogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAILogic;
+		};
+		C85890FE2F809BAA004560CB /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		C85891002F809BAA004560CB /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		C85891022F809BAA004560CB /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		C85891042F809BAA004560CB /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		C85891062F809BAA004560CB /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C85890F92F809BAA004560CB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C80F55662F7A1A9E00B69D6B /* Project object */;
 }

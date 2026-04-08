@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  Study Pal
-//
-//  Created by Mohamed Shafran on 2026-03-30.
-//
 
 import SwiftUI
 
