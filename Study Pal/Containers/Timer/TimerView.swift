@@ -1,7 +1,13 @@
 import SwiftUI
 
 struct TimerView: View {
-    @State private var taskText: String = ""
+    @StateObject private var timerViewModel = TimerViewModel()
+    @StateObject private var taskViewModel = TaskViewModel()
+    @State private var showCompleteAlert = false
+    
+    var availableTasks: [StudyTask] {
+        taskViewModel.tasks.filter { $0.status == "In Progress" || $0.status == "To Do" }
+    }
     
     var body: some View {
         NavigationStack {
@@ -37,35 +43,75 @@ struct TimerView: View {
                     
                     // Timer Mode Selection
                     HStack(spacing: 12) {
-                        TimerModeCard(title: "Focus", time: "25 Min", isSelected: true)
-                        TimerModeCard(title: "Short", time: "5 Min", isSelected: false)
-                        TimerModeCard(title: "Long", time: "15 Min", isSelected: false)
+                        TimerModeCard(title: "Focus", time: "25 Min", isSelected: timerViewModel.selectedMode == "Focus")
+                            .onTapGesture { timerViewModel.selectMode("Focus") }
+                        TimerModeCard(title: "Short", time: "5 Min", isSelected: timerViewModel.selectedMode == "Short")
+                            .onTapGesture { timerViewModel.selectMode("Short") }
+                        TimerModeCard(title: "Long", time: "15 Min", isSelected: timerViewModel.selectedMode == "Long")
+                            .onTapGesture { timerViewModel.selectMode("Long") }
                     }
                     .padding(.horizontal)
                     
-                    // Study Task Input
-                    TextField("What are you studying?", text: $taskText)
+                    // Study Task Picker
+                    Menu {
+                        Picker("Select a task", selection: $timerViewModel.selectedTaskId) {
+                            Text("No task selected").tag("")
+                            ForEach(availableTasks) { task in
+                                Text(task.title).tag(task.id ?? "")
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text(timerViewModel.selectedTaskId.isEmpty ? "Select an active task" : (availableTasks.first(where: { $0.id == timerViewModel.selectedTaskId })?.title ?? "Unknown Task"))
+                            .foregroundColor(timerViewModel.selectedTaskId.isEmpty ? .gray : .primary)
+                            Spacer()
+                            Image(systemName: "chevron.up.chevron.down")
+                                .foregroundColor(.gray)
+                        }
                         .padding()
                         .background(Color.white)
                         .cornerRadius(15)
                         .padding(.horizontal)
+                    }
                     
                     // Main Timer Card
                     VStack(spacing: 35) {
-                        Text("25 : 00")
+                        Text(timerViewModel.timeString)
                             .font(.system(size: 80, weight: .bold, design: .rounded))
                         
                         // Progress Bar
-                        Capsule()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 8)
-                            .padding(.horizontal, 40)
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                Capsule()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 8)
+                                    
+                                Capsule()
+                                    .fill(LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing))
+                                    .frame(width: geometry.size.width * CGFloat(timerViewModel.progress), height: 8)
+                            }
+                        }
+                        .frame(height: 8)
+                        .padding(.horizontal, 40)
                         
                         // Control Buttons
                         HStack(spacing: 40) {
-                            ControlButton(icon: "play.fill", colors: [.blue, .purple])
-                            ControlButton(icon: "arrow.counterclockwise", colors: [.indigo, .purple])
+                            ControlButton(icon: timerViewModel.isRunning ? "pause.fill" : "play.fill", colors: [.blue, .purple]) {
+                                timerViewModel.toggleTimer()
+                            }
+                            ControlButton(icon: "checkmark", colors: [.green, .mint]) {
+                                if !timerViewModel.selectedTaskId.isEmpty {
+                                    showCompleteAlert = true
+                                } else {
+                                    timerViewModel.finishSessionEarly()
+                                }
+                            }
+                            ControlButton(icon: "arrow.counterclockwise", colors: [.indigo, .purple]) {
+                                timerViewModel.resetTimer()
+                            }
                         }
+                        .disabled(timerViewModel.selectedTaskId.isEmpty)
+                        .opacity(timerViewModel.selectedTaskId.isEmpty ? 0.6 : 1.0)
                     }
                     .padding(.vertical, 50)
                     .frame(maxWidth: .infinity)
@@ -96,6 +142,17 @@ struct TimerView: View {
             }
         }
         .navigationBarHidden(true)
+        .alert("Complete Task?", isPresented: $showCompleteAlert) {
+            Button("Just finish session", role: .none) {
+                timerViewModel.finishSessionEarly(markAsDone: false)
+            }
+            Button("Mark Task as Done", role: .destructive) {
+                timerViewModel.finishSessionEarly(markAsDone: true)
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Would you like to mark this task as complete or just save this study session?")
+        }
         }
     }
 }
@@ -130,9 +187,10 @@ struct TimerModeCard: View {
 struct ControlButton: View {
     let icon: String
     let colors: [Color]
+    var action: () -> Void = {}
     
     var body: some View {
-        Button(action: {}) {
+        Button(action: action) {
             Image(systemName: icon)
                 .font(.title2.bold())
                 .foregroundColor(.white)

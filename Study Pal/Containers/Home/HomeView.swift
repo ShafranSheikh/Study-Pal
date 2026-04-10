@@ -1,45 +1,51 @@
 import SwiftUI
 
 struct HomeView: View {
+    @StateObject private var viewModel = HomeViewModel()
+    
     var body: some View {
-        NavigationStack { // Added NavigationStack to enable screen transitions
+        NavigationStack {
             ZStack {
                 Color.gray.opacity(0.09).ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        HeaderView()
-                        StreakCard()
+                        HeaderView(profile: viewModel.userProfile, progress: viewModel.levelProgress)
+                        StreakCard(streak: viewModel.userProfile?.currentStreak ?? 0)
                         
                         HStack(spacing: 15) {
-                            // Link to your FlashCardsView page
                             NavigationLink(destination: FlashCardsView()) {
                                 ActionCard(title: "FlashCards",
-                                        subtitle: "2 Remaining",
-                                        icon: "bolt.fill",
-                                        color: .blue)
+                                         subtitle: "2 Remaining",
+                                         icon: "bolt.fill",
+                                         color: .blue)
                             }
-                            .buttonStyle(PlainButtonStyle()) // Prevents default blue text color
+                            .buttonStyle(PlainButtonStyle())
                             
-                            // Navigate to Grades
                             NavigationLink(destination: GradesView()) {
                                 ActionCard(title: "Grades",
-                                        subtitle: "Start studying",
-                                        icon: "target",
-                                        color: .indigo)
+                                         subtitle: "Start studying",
+                                         icon: "target",
+                                         color: .indigo)
                             }
                                 .buttonStyle(PlainButtonStyle())
                         }
                         
-                        FocusSection()
-                        ProgressCard()
-                        UrgentAlert()
-                        UpcomingTasksSection()
+                        FocusSection(focusTime: viewModel.focusTimeToday, 
+                                     completedCount: viewModel.completedToday,
+                                     focusScore: viewModel.focusScore)
+                        ProgressCard(completionRate: viewModel.completionRate, completed: viewModel.completedToday, remaining: viewModel.upcomingTasks.count + viewModel.inProgressTasks.count)
+                        
+                        if viewModel.upcomingTasks.count > 3 {
+                            UrgentAlert(count: viewModel.upcomingTasks.count)
+                        }
+                        
+                        UpcomingTasksSection(tasks: viewModel.upcomingTasks)
                     }
                     .padding()
                 }
             }
-            .navigationBarHidden(true) // Hides the top bar to keep your custom header look
+            .navigationBarHidden(true)
         }
     }
 }
@@ -47,18 +53,21 @@ struct HomeView: View {
 // MARK: - Subviews
 
 struct HeaderView: View {
+    let profile: UserProfile?
+    let progress: Double
+    
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Hello, Jhon")
+                Text("Hello, \(profile?.firstName ?? "User")")
                     .font(.system(size: 28, weight: .bold))
-                Text("Wednesday, 25th March")
+                Text(Date().formatted(date: .complete, time: .omitted))
                     .foregroundColor(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing) {
                 HStack(spacing: 8) {
-                    Text("Level 1").font(.subheadline).bold()
+                    Text("Level \(profile?.level ?? 1)").font(.subheadline).bold()
                     Image(systemName: "bell")
                         .font(.title3)
                 }
@@ -66,7 +75,9 @@ struct HeaderView: View {
                     .fill(Color.gray.opacity(0.2))
                     .frame(width: 80, height: 8)
                     .overlay(alignment: .leading) {
-                        Capsule().fill(Color.gray).frame(width: 30)
+                        GeometryReader { geo in
+                            Capsule().fill(Color.blue).frame(width: geo.size.width * CGFloat(progress))
+                        }
                     }
             }
         }
@@ -74,18 +85,21 @@ struct HeaderView: View {
 }
 
 struct StreakCard: View {
+    let streak: Int
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Study Streak").font(.headline)
-                Text("5 Days").font(.system(size: 34, weight: .bold))
-                Text("Keep it up! You're on fire").font(.subheadline)
+                Text("\(streak) Days").font(.system(size: 34, weight: .bold))
+                Text(streak > 0 ? "Keep it up! You're on fire" : "Start your streak today!")
+                    .font(.subheadline)
             }
             Spacer()
             Image(systemName: "star.circle.fill")
                 .resizable()
                 .frame(width: 60, height: 60)
-                .opacity(0.5)
+                .opacity(0.8)
         }
         .padding()
         .foregroundColor(.white)
@@ -118,6 +132,10 @@ struct ActionCard: View {
 }
 
 struct FocusSection: View {
+    let focusTime: Int
+    let completedCount: Int
+    let focusScore: Int
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -127,11 +145,11 @@ struct FocusSection: View {
             }
             
             HStack {
-                FocusStat(val: "0M", label: "Focus Time", icon: "clock.fill", color: .purple)
+                FocusStat(val: "\(focusTime)M", label: "Focus Time", icon: "clock.fill", color: .purple)
                 Spacer()
-                FocusStat(val: "7/10", label: "Focus Score", icon: "scope", color: .green)
+                FocusStat(val: "\(focusScore)/10", label: "Focus Score", icon: "scope", color: .green)
                 Spacer()
-                FocusStat(val: "1", label: "Completed", icon: "checkmark.circle.fill", color: .blue)
+                FocusStat(val: "\(completedCount)", label: "Completed", icon: "checkmark.circle.fill", color: .blue)
             }
             .padding(.top, 10)
         }
@@ -167,6 +185,10 @@ struct FocusStat: View {
 }
 
 struct ProgressCard: View {
+    let completionRate: Double
+    let completed: Int
+    let remaining: Int
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
@@ -179,20 +201,20 @@ struct ProgressCard: View {
                 HStack {
                     Text("Completion Rate").font(.subheadline)
                     Spacer()
-                    Text("20%").font(.subheadline).bold()
+                    Text("\(Int(completionRate * 100))%").font(.subheadline).bold()
                 }
-                ProgressView(value: 0.2)
+                ProgressView(value: completionRate)
                     .tint(.white)
                     .background(Color.white.opacity(0.3))
             }
             
             HStack(spacing: 20) {
                 VStack(alignment: .leading) {
-                    Text("1").bold()
+                    Text("\(completed)").bold()
                     Text("Completed").font(.caption)
                 }
                 VStack(alignment: .leading) {
-                    Text("4").bold()
+                    Text("\(remaining)").bold()
                     Text("Remaining").font(.caption)
                 }
             }
@@ -205,13 +227,14 @@ struct ProgressCard: View {
 }
 
 struct UrgentAlert: View {
+    let count: Int
     var body: some View {
         HStack {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundColor(.red)
             VStack(alignment: .leading) {
                 Text("Urgent tasks").bold()
-                Text("You have 3 tasks due soon").font(.caption)
+                Text("You have \(count) tasks due soon").font(.caption)
             }
             Spacer()
         }
@@ -222,18 +245,29 @@ struct UrgentAlert: View {
 }
 
 struct UpcomingTasksSection: View {
+    let tasks: [StudyTask]
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Upcoming Tasks").font(.title3).bold()
             
-            TaskRow(title: "English Reading", desc: "Read chapter 8 - 10", tag: "English", tagColor: .purple, due: "Mar 24")
-            TaskRow(title: "Maths Assignment", desc: "Complete exercise 5.5", tag: "Maths", tagColor: .orange, due: "Mar 24")
+            if tasks.isEmpty {
+                Text("No upcoming tasks. Add some!")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                ForEach(tasks.prefix(3)) { task in
+                    TaskRow(task: task)
+                }
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
 struct TaskRow: View {
-    let title: String; let desc: String; let tag: String; let tagColor: Color; let due: String
+    let task: StudyTask
+    
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
             Circle()
@@ -243,16 +277,16 @@ struct TaskRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Image(systemName: "doc.plaintext")
-                    Text(title).bold()
+                    Text(task.title).bold()
                 }
-                Text(desc)
+                Text(task.description)
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
                 HStack {
-                    Text("High").padding(.horizontal, 8).padding(.vertical, 2).background(Color.blue.opacity(0.1)).cornerRadius(5)
-                    Text(tag).padding(.horizontal, 8).padding(.vertical, 2).background(tagColor.opacity(0.1)).cornerRadius(5)
-                    Text("Due \(due)").foregroundColor(.secondary)
+                    Text(task.priority).padding(.horizontal, 8).padding(.vertical, 2).background(priorityColor(task.priority).opacity(0.1)).cornerRadius(5)
+                    Text(task.subject).padding(.horizontal, 8).padding(.vertical, 2).background(Color.purple.opacity(0.1)).cornerRadius(5)
+                    Text("Due \(task.dueDate)").foregroundColor(.secondary)
                 }
                 .font(.caption2)
             }
@@ -261,5 +295,14 @@ struct TaskRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white)
         .cornerRadius(15)
+    }
+    
+    private func priorityColor(_ priority: String) -> Color {
+        switch priority.lowercased() {
+        case "high": return .red
+        case "medium": return .orange
+        case "low": return .green
+        default: return .blue
+        }
     }
 }

@@ -11,7 +11,9 @@ struct UserProfile: Codable, Identifiable {
     var themeColor: String  // stored as hex string
     var level: Int
     var xp: Int
-    var createdAt: Date
+    var currentStreak: Int?
+    var lastStreakUpdate: Date?
+    var createdAt: Date?
 
     var fullName: String { "\(firstName) \(lastName)" }
 
@@ -28,6 +30,8 @@ struct UserProfile: Codable, Identifiable {
             themeColor: "#007AFF",
             level: 1,
             xp: 0,
+            currentStreak: 0,
+            lastStreakUpdate: nil,
             createdAt: Date()
         )
     }

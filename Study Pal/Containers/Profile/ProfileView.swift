@@ -83,7 +83,7 @@ struct ProfileView: View {
                                 HStack {
                                     Text("Level \(userLevel)")
                                     Spacer()
-                                    Text("\(userXP)/100 XP")
+                                    Text("\(userXP)/1000 XP")
                                 }
                                 .font(.caption.bold())
                                 .foregroundColor(.white)

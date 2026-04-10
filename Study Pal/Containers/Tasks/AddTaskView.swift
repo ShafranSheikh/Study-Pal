@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AddTaskView: View {
     @Environment(\.dismiss) var dismiss
+    @ObservedObject var viewModel: TaskViewModel
     
     @State private var taskTitle: String = ""
     @State private var description: String = ""
@@ -112,7 +113,14 @@ struct AddTaskView: View {
                 // Action Buttons
                 VStack(spacing: 15) {
                     Button(action: {
-                        // Add logic here to append the task
+                        viewModel.addTask(
+                            title: taskTitle,
+                            description: description,
+                            subject: subject,
+                            taskType: taskType,
+                            dueDate: dueDate,
+                            priority: priority
+                        )
                         dismiss()
                     }) {
                         Text("Add Task")

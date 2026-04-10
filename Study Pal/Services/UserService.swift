@@ -46,4 +46,81 @@ class UserService {
             onChange(profile)
         }
     }
+
+    // MARK: - Add XP and update Level
+    func addXP(uid: String, amount: Int, completion: ((Error?) -> Void)? = nil) {
+        fetchProfile(uid: uid) { profile, error in
+            guard let profile = profile else {
+                completion?(error)
+                return
+            }
+            
+            let newXP = profile.xp + amount
+            let newLevel = Level.calculateLevel(from: newXP)
+            
+            let updates: [String: Any] = [
+                "xp": newXP,
+                "level": newLevel
+            ]
+            
+            self.updateProfile(uid: uid, fields: updates, completion: completion)
+        }
+    }
+
+    // MARK: - Update Streak
+    func updateStreak(uid: String, completion: ((Error?) -> Void)? = nil) {
+        fetchProfile(uid: uid) { profile, error in
+            guard let profile = profile else {
+                completion?(error)
+                return
+            }
+
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            var newStreak = (profile.currentStreak ?? 0)
+            
+            if let lastUpdate = profile.lastStreakUpdate {
+                let lastUpdateDate = calendar.startOfDay(for: lastUpdate)
+                
+                if lastUpdateDate == today {
+                    // Already updated today
+                    completion?(nil)
+                    return
+                } else if let yesterday = calendar.date(byAdding: .day, value: -1, to: today),
+                          lastUpdateDate == yesterday {
+                    // Last update was yesterday, increment streak
+                    newStreak += 1
+                } else {
+                    // Last update was more than a day ago, reset to 1
+                    newStreak = 1
+                }
+            } else {
+                // First time update
+                newStreak = 1
+            }
+
+            let updates: [String: Any] = [
+                "currentStreak": newStreak,
+                "lastStreakUpdate": Timestamp(date: Date())
+            ]
+
+            self.updateProfile(uid: uid, fields: updates, completion: completion)
+        }
+    }
+
+    // MARK: - Check and Reset Streak if missed
+    func checkStreakReset(uid: String) {
+        fetchProfile(uid: uid) { profile, error in
+            guard let profile = profile, let lastUpdate = profile.lastStreakUpdate else { return }
+
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            let lastUpdateDate = calendar.startOfDay(for: lastUpdate)
+
+            if let diff = calendar.dateComponents([.day], from: lastUpdateDate, to: today).day, diff > 1 {
+                // More than 1 day difference, streak is broken
+                self.updateProfile(uid: uid, fields: ["currentStreak": 0])
+            }
+        }
+    }
 }

@@ -1,23 +1,20 @@
 import SwiftUI
 
-// MARK: - Task Model
-struct Task: Identifiable {
-    let id = UUID()
-    let title: String
-    let description: String
-    let priority: String
-    let category: String
-    let dueDate: String
-}
+// Removed local Task model to use StudyTask from Models
 
 struct TasksView: View {
     @State private var searchText = ""
     @State private var selectedTab = "To Do"
+    @StateObject private var viewModel = TaskViewModel()
     
-    let tasks = [
-        Task(title: "English Reading", description: "Read chapter 8 - 10 of To Kill a Mockingbird", priority: "High", category: "English", dueDate: "Mar 24"),
-        Task(title: "Maths Assignment", description: "Complete exercise 5.5 and 5.6", priority: "Medium", category: "Maths", dueDate: "Mar 24")
-    ]
+    var filteredTasks: [StudyTask] {
+        let statusFiltered = viewModel.tasks.filter { $0.status == selectedTab }
+        if searchText.isEmpty {
+            return statusFiltered
+        } else {
+            return statusFiltered.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -32,7 +29,7 @@ struct TasksView: View {
                         Spacer()
                         
                         // Use NavigationLink to push AddTaskView as a new page
-                        NavigationLink(destination: AddTaskView()) {
+                        NavigationLink(destination: AddTaskView(viewModel: viewModel)) {
                             Image(systemName: "plus")
                                 .font(.title2.bold())
                                 .foregroundColor(.white)
@@ -64,17 +61,19 @@ struct TasksView: View {
 
                     // TAB SECTION
                     HStack(spacing: 12) {
-                        TabButton(title: "To Do", count: 2, selectedTab: $selectedTab)
-                        TabButton(title: "In Progress", count: 1, selectedTab: $selectedTab)
-                        TabButton(title: "Done", count: 2, selectedTab: $selectedTab)
+                        TabButton(title: "To Do", count: viewModel.tasks.filter { $0.status == "To Do" }.count, selectedTab: $selectedTab)
+                        TabButton(title: "In Progress", count: viewModel.tasks.filter { $0.status == "In Progress" }.count, selectedTab: $selectedTab)
+                        TabButton(title: "Done", count: viewModel.tasks.filter { $0.status == "Done" }.count, selectedTab: $selectedTab)
                     }
                     .padding(.horizontal)
 
                     // TASK LIST
                     ScrollView {
                         VStack(spacing: 16) {
-                            ForEach(tasks) { task in
-                                TaskCard(task: task)
+                            ForEach(filteredTasks) { task in
+                                TaskCard(task: task) { newStatus in
+                                    viewModel.updateTaskStatus(task: task, newStatus: newStatus)
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -116,14 +115,45 @@ struct TabButton: View {
 }
 
 struct TaskCard: View {
-    let task: Task
+    let task: StudyTask
+    var onStatusChange: (String) -> Void
+    
+    @State private var showingConfirmation = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            Circle()
-                .stroke(Color.gray.opacity(0.4), lineWidth: 2)
-                .frame(width: 26, height: 26)
+            Button(action: {
+                if task.status != "Done" {
+                    showingConfirmation = true
+                }
+            }) {
+                ZStack {
+                    Circle()
+                        .stroke(task.status == "Done" ? Color.green : (task.status == "In Progress" ? Color.blue : Color.gray.opacity(0.4)), lineWidth: 2)
+                        .frame(width: 26, height: 26)
+                    
+                    if task.status == "Done" {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.green)
+                    } else if task.status == "In Progress" {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 14, height: 14)
+                    }
+                }
                 .padding(.top, 4)
+            }
+            .alert(task.status == "To Do" ? "Start Task" : "Complete Task", isPresented: $showingConfirmation) {
+                if task.status == "To Do" {
+                    Button("Start", role: .none) { onStatusChange("In Progress") }
+                } else if task.status == "In Progress" {
+                    Button("Complete", role: .none) { onStatusChange("Done") }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text(task.status == "To Do" ? "Are you ready to start this task?" : "Have you finished this task?")
+            }
             
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
@@ -140,7 +170,7 @@ struct TaskCard: View {
                 
                 HStack(spacing: 10) {
                     TagLabel(text: task.priority, color: .blue)
-                    TagLabel(text: task.category, color: .purple)
+                    TagLabel(text: task.subject, color: .purple)
                     
                     Text("Due \(task.dueDate)")
                         .font(.system(size: 13))
