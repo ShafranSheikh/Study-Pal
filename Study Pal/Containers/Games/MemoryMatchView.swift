@@ -140,6 +140,9 @@ struct MemoryMatchView: View {
         savedResult = result
         gameVM.saveResult(result)
 
+        // Notifications
+        NotificationManager.shared.sendGameWinNotification(gameName: "Memory Match", score: score)
+
         withAnimation { gameFinished = true }
     }
 

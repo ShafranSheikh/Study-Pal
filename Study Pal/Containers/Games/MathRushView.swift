@@ -206,6 +206,14 @@ struct MathRushView: View {
         )
         savedResult = result
         gameVM.saveResult(result)
+        
+        // Notifications
+        if score >= 100 {
+            NotificationManager.shared.sendGameWinNotification(gameName: "Math Rush", score: score)
+        } else if score < 20 {
+            NotificationManager.shared.sendGameLossNotification(gameName: "Math Rush", score: score)
+        }
+        
         withAnimation { gameState = .finished }
     }
 }

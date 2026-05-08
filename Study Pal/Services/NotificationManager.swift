@@ -121,6 +121,62 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
     }
     
+    // Game Notifications
+    
+    /// Send a notification when a user wins a game.
+    func sendGameWinNotification(gameName: String, score: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Victory!"
+        let body = "Amazing! You won in \(gameName) with a score of \(score)!"
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "GAME_WIN"
+        
+        addInAppNotification(title: content.title, body: body)
+        scheduleNotification(content: content)
+    }
+
+    /// Send a notification when a user loses a game.
+    func sendGameLossNotification(gameName: String, score: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = " Game Over"
+        let body = "Better luck next time! You scored \(score) in \(gameName). Keep practicing!"
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "GAME_LOSS"
+        
+        addInAppNotification(title: content.title, body: body)
+        scheduleNotification(content: content)
+    }
+
+    /// Send a notification when a high score is set.
+    func sendHighScoreNotification(gameName: String, score: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "New High Score!"
+        let body = "Incredible! You set a new record of \(score) in \(gameName)!"
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "HIGH_SCORE"
+        
+        addInAppNotification(title: content.title, body: body)
+        scheduleNotification(content: content)
+    }
+
+    private func scheduleNotification(content: UNMutableNotificationContent) {
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     //Helpers
     
     private func buildTaskNotificationBody(title: String, subject: String, dueDate: String, priority: String) -> String {

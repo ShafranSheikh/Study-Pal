@@ -220,6 +220,14 @@ struct ColorMatchView: View {
         )
         savedResult = result
         gameVM.saveResult(result)
+        
+        // Notifications
+        if score >= 100 {
+            NotificationManager.shared.sendGameWinNotification(gameName: "Color Match", score: score)
+        } else if score < 30 {
+            NotificationManager.shared.sendGameLossNotification(gameName: "Color Match", score: score)
+        }
+        
         withAnimation { gameState = .finished }
     }
 }

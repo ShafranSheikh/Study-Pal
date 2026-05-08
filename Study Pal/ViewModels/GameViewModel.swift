@@ -13,6 +13,10 @@ class GameViewModel: ObservableObject {
 
     private let db = Firestore.firestore()
 
+    init() {
+        fetchHighScores()
+    }
+
     // Game Type Constants
     static let memoryMatch = "memoryMatch"
     static let speedClick  = "speedClick"
@@ -60,11 +64,29 @@ class GameViewModel: ObservableObject {
                         }
                     }
 
-                    // Refresh high scores cache
+                    // Refresh high scores cache and check for new high score
+                    let oldHighScore = self?.highScores[result.gameType] ?? 0
+                    if result.score > oldHighScore {
+                        NotificationManager.shared.sendHighScoreNotification(
+                            gameName: self?.formatGameName(result.gameType) ?? result.gameType,
+                            score: result.score
+                        )
+                    }
+                    
                     self?.fetchHighScores()
                     completion?(nil)
                 }
             }
+    }
+
+    private func formatGameName(_ type: String) -> String {
+        switch type {
+        case GameViewModel.memoryMatch: return "Memory Match"
+        case GameViewModel.speedClick: return "Speed Click"
+        case GameViewModel.mathRush: return "Math Rush"
+        case GameViewModel.colorMatch: return "Color Match"
+        default: return type.capitalized
+        }
     }
 
     // Fetch High Scores

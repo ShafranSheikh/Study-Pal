@@ -180,6 +180,14 @@ struct SpeedClickView: View {
         )
         savedResult = result
         gameVM.saveResult(result)
+        
+        // Notifications
+        if score >= 150 {
+            NotificationManager.shared.sendGameWinNotification(gameName: "Speed Click", score: score)
+        } else if score < 50 {
+            NotificationManager.shared.sendGameLossNotification(gameName: "Speed Click", score: score)
+        }
+        
         withAnimation { gameState = .finished }
     }
 }
