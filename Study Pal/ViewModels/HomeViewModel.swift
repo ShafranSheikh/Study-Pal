@@ -81,7 +81,20 @@ class HomeViewModel: ObservableObject {
     }
     
     var focusScore: Int {
-        
         return min(10, focusTimeToday / 12)
+    }
+    
+    func updateTaskStatus(task: StudyTask, newStatus: String) {
+        guard let uid = Auth.auth().currentUser?.uid, let taskId = task.id else { return }
+        
+        db.collection("users").document(uid).collection("tasks").document(taskId)
+            .updateData(["status": newStatus]) { error in
+                if let error = error {
+                    print("Error updating task status: \(error.localizedDescription)")
+                } else if newStatus == "Done" {
+                    UserService.shared.addXP(uid: uid, amount: 200)
+                    UserService.shared.updateStreak(uid: uid)
+                }
+            }
     }
 }

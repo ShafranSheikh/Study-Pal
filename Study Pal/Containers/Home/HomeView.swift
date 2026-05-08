@@ -42,7 +42,9 @@ struct HomeView: View {
                             UrgentAlert(count: viewModel.upcomingTasks.count)
                         }
                         
-                        UpcomingTasksSection(tasks: viewModel.upcomingTasks)
+                        UpcomingTasksSection(tasks: viewModel.upcomingTasks) { task, newStatus in
+                            viewModel.updateTaskStatus(task: task, newStatus: newStatus)
+                        }
                     }
                     .padding()
                 }
@@ -269,6 +271,8 @@ struct UrgentAlert: View {
 
 struct UpcomingTasksSection: View {
     let tasks: [StudyTask]
+    var onStatusChange: (StudyTask, String) -> Void
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Upcoming Tasks").font(.title3).bold()
@@ -280,7 +284,7 @@ struct UpcomingTasksSection: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 ForEach(tasks.prefix(3)) { task in
-                    TaskRow(task: task)
+                    TaskRow(task: task, onStatusChange: onStatusChange)
                 }
             }
         }
@@ -290,12 +294,43 @@ struct UpcomingTasksSection: View {
 
 struct TaskRow: View {
     let task: StudyTask
+    var onStatusChange: (StudyTask, String) -> Void
+    
+    @State private var showingStatusConfirmation = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
-            Circle()
-                .stroke(Color.gray.opacity(0.5), lineWidth: 2)
-                .frame(width: 25, height: 25)
+            Button(action: {
+                if task.status != "Done" {
+                    showingStatusConfirmation = true
+                }
+            }) {
+                ZStack {
+                    Circle()
+                        .stroke(task.status == "Done" ? Color.green : (task.status == "In Progress" ? Color.blue : Color.gray.opacity(0.4)), lineWidth: 2)
+                        .frame(width: 25, height: 25)
+                    
+                    if task.status == "Done" {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.green)
+                    } else if task.status == "In Progress" {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 14, height: 14)
+                    }
+                }
+            }
+            .alert(task.status == "To Do" ? "Start Task" : "Complete Task", isPresented: $showingStatusConfirmation) {
+                if task.status == "To Do" {
+                    Button("Start", role: .none) { onStatusChange(task, "In Progress") }
+                } else if task.status == "In Progress" {
+                    Button("Complete", role: .none) { onStatusChange(task, "Done") }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text(task.status == "To Do" ? "Are you ready to start this task?" : "Have you finished this task?")
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {

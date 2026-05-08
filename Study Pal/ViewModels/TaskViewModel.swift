@@ -78,4 +78,14 @@ class TaskViewModel: ObservableObject {
                 }
             }
     }
+    
+    func deleteTask(task: StudyTask) {
+        guard let uid = Auth.auth().currentUser?.uid, let taskId = task.id else { return }
+        
+        db.collection("users").document(uid).collection("tasks").document(taskId).delete { error in
+            if let error = error {
+                print("Error deleting task: \(error.localizedDescription)")
+            }
+        }
+    }
 }

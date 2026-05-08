@@ -223,9 +223,12 @@ class AuthViewModel: ObservableObject {
     }
 
     // Update profile fields
-    func updateUserProfile(fields: [String: Any]) {
-        guard let uid = currentUser?.uid else { return }
-        UserService.shared.updateProfile(uid: uid, fields: fields)
+    func updateUserProfile(fields: [String: Any], completion: ((Error?) -> Void)? = nil) {
+        guard let uid = currentUser?.uid else { 
+            completion?(NSError(domain: "Auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not logged in"]))
+            return 
+        }
+        UserService.shared.updateProfile(uid: uid, fields: fields, completion: completion)
     }
 
     // Error Helpers

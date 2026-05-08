@@ -26,8 +26,9 @@ struct TasksView: View {
                         
                         Spacer()
                         
-                        
-                        NavigationLink(destination: AddTaskView(viewModel: viewModel)) {
+                        NavigationLink {
+                            AddTaskView(viewModel: viewModel)
+                        } label: {
                             Image(systemName: "plus")
                                 .font(.title2.bold())
                                 .foregroundColor(.white)
@@ -69,9 +70,15 @@ struct TasksView: View {
                     ScrollView {
                         VStack(spacing: 16) {
                             ForEach(filteredTasks) { task in
-                                TaskCard(task: task) { newStatus in
-                                    viewModel.updateTaskStatus(task: task, newStatus: newStatus)
-                                }
+                                TaskCard(
+                                    studyTask: task, 
+                                    onStatusChange: { newStatus in
+                                        viewModel.updateTaskStatus(task: task, newStatus: newStatus)
+                                    }, 
+                                    onDelete: {
+                                        viewModel.deleteTask(task: task)
+                                    }
+                                )
                             }
                         }
                         .padding(.horizontal)
@@ -113,28 +120,30 @@ struct TabButton: View {
 }
 
 struct TaskCard: View {
-    let task: StudyTask
+    let studyTask: StudyTask
     var onStatusChange: (String) -> Void
+    var onDelete: () -> Void
     
-    @State private var showingConfirmation = false
+    @State private var showingStatusConfirmation = false
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Button(action: {
-                if task.status != "Done" {
-                    showingConfirmation = true
+                if studyTask.status != "Done" {
+                    showingStatusConfirmation = true
                 }
             }) {
                 ZStack {
                     Circle()
-                        .stroke(task.status == "Done" ? Color.green : (task.status == "In Progress" ? Color.blue : Color.gray.opacity(0.4)), lineWidth: 2)
+                        .stroke(studyTask.status == "Done" ? Color.green : (studyTask.status == "In Progress" ? Color.blue : Color.gray.opacity(0.4)), lineWidth: 2)
                         .frame(width: 26, height: 26)
                     
-                    if task.status == "Done" {
+                    if studyTask.status == "Done" {
                         Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.green)
-                    } else if task.status == "In Progress" {
+                    } else if studyTask.status == "In Progress" {
                         Circle()
                             .fill(Color.blue)
                             .frame(width: 14, height: 14)
@@ -142,35 +151,51 @@ struct TaskCard: View {
                 }
                 .padding(.top, 4)
             }
-            .alert(task.status == "To Do" ? "Start Task" : "Complete Task", isPresented: $showingConfirmation) {
-                if task.status == "To Do" {
+            .alert(studyTask.status == "To Do" ? "Start Task" : "Complete Task", isPresented: $showingStatusConfirmation) {
+                if studyTask.status == "To Do" {
                     Button("Start", role: .none) { onStatusChange("In Progress") }
-                } else if task.status == "In Progress" {
+                } else if studyTask.status == "In Progress" {
                     Button("Complete", role: .none) { onStatusChange("Done") }
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text(task.status == "To Do" ? "Are you ready to start this task?" : "Have you finished this task?")
+                Text(studyTask.status == "To Do" ? "Are you ready to start this task?" : "Have you finished this task?")
             }
             
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     Image(systemName: "doc.plaintext")
                         .foregroundColor(.gray)
-                    Text(task.title)
+                    Text(studyTask.title)
                         .font(.system(size: 18, weight: .bold))
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        showingDeleteConfirmation = true
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red.opacity(0.7))
+                            .font(.system(size: 16))
+                    }
+                    .alert("Delete Task", isPresented: $showingDeleteConfirmation) {
+                        Button("Delete", role: .destructive) { onDelete() }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("Are you sure you want to delete this task? This action cannot be undone.")
+                    }
                 }
                 
-                Text(task.description)
+                Text(studyTask.description)
                     .font(.system(size: 15))
                     .foregroundColor(.gray)
                     .lineLimit(2)
                 
                 HStack(spacing: 10) {
-                    TagLabel(text: task.priority, color: .blue)
-                    TagLabel(text: task.subject, color: .purple)
+                    TagLabel(text: studyTask.priority, color: .blue)
+                    TagLabel(text: studyTask.subject, color: .purple)
                     
-                    Text("Due \(task.dueDate)")
+                    Text("Due \(studyTask.dueDate)")
                         .font(.system(size: 13))
                         .foregroundColor(.gray)
                         .padding(.leading, 5)

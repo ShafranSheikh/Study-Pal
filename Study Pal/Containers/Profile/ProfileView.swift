@@ -14,6 +14,7 @@ struct ProfileView: View {
     @State private var selectedThemeColor: Color = .blue
     @State private var showBiometricPasswordAlert = false
     @State private var biometricPassword = ""
+    @State private var showLogoutAlert = false
 
     // Derived display values from real profile
     private var displayName: String {
@@ -84,12 +85,12 @@ struct ProfileView: View {
                                 HStack {
                                     Text("Level \(userLevel)")
                                     Spacer()
-                                    Text("\(userXP)/1000 XP")
+                                    Text("\(userXP % 1000)/1000 XP")
                                 }
                                 .font(.caption.bold())
                                 .foregroundColor(.white)
 
-                                let progress = min(CGFloat(userXP) / 100.0, 1.0)
+                                let progress = CGFloat(userXP % 1000) / 1000.0
                                 GeometryReader { geo in
                                     ZStack(alignment: .leading) {
                                         Capsule()
@@ -193,7 +194,7 @@ struct ProfileView: View {
 
                         // Log Out Button
                         Button(action: {
-                            authViewModel.signOut()
+                            showLogoutAlert = true
                         }) {
                             Text("Log Out")
                                 .font(.headline)
@@ -209,6 +210,14 @@ struct ProfileView: View {
                     .padding(.vertical)
                 }
                 .navigationBarHidden(true)
+                .alert("Log Out", isPresented: $showLogoutAlert) {
+                    Button("Log Out", role: .destructive) {
+                        authViewModel.signOut()
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("Are you sure you want to log out? You will need to enter your credentials again to access your study plan.")
+                }
                 .sheet(isPresented: $showAvatarSheet, onDismiss: saveAvatar) {
                     AvatarSelectionSheet(selectedAvatar: $selectedAvatar, themeColor: selectedThemeColor)
                         .presentationDetents([.medium, .large])
