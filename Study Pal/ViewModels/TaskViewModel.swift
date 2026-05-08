@@ -54,6 +54,13 @@ class TaskViewModel: ObservableObject {
         
         do {
             try docRef.setData(from: newTask)
+            // Send a local push notification confirming task creation
+            NotificationManager.shared.sendTaskCreatedNotification(
+                title: title,
+                subject: subject,
+                dueDate: dueDate,
+                priority: priority
+            )
         } catch {
             print("Error adding task: \(error.localizedDescription)")
         }

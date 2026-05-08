@@ -3,6 +3,7 @@ import SwiftUI
 import FirebaseCore
 import UIKit
 import AppIntents
+import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -13,6 +14,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     if #available(iOS 16.4, *) {
         StudyPalShortcuts.updateAppShortcutParameters()
     }
+
+    // Request notification permission and set up the delegate
+    NotificationManager.shared.requestAuthorization()
 
     return true
   }

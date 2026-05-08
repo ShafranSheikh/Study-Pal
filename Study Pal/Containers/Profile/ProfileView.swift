@@ -1,9 +1,10 @@
 import SwiftUI
 import FirebaseAuth
+import UserNotifications
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var notificationsEnabled = true
+    @ObservedObject private var notificationManager = NotificationManager.shared
 
     @State private var showAvatarSheet = false
     @State private var showThemeSheet = false
@@ -148,7 +149,19 @@ struct ProfileView: View {
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
-                                ToggleRow(icon: "bell", title: "Notifications", subtitle: "Get deadline reminders", isOn: $notificationsEnabled)
+                                ToggleRow(icon: "bell", title: "Notifications", subtitle: "Get deadline reminders", isOn: Binding(
+                                    get: { notificationManager.isAuthorized },
+                                    set: { newValue in
+                                        if newValue {
+                                            notificationManager.requestAuthorization()
+                                        } else {
+                                            // Cannot revoke permission programmatically; open Settings
+                                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                                UIApplication.shared.open(url)
+                                            }
+                                        }
+                                    }
+                                ))
                                 Divider().padding(.leading, 60)
                                 ToggleRow(icon: "faceid", title: "Biometric Lock", subtitle: "Use FaceID / TouchID", isOn: Binding(
                                     get: { authViewModel.isBiometricEnabled },
