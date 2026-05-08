@@ -9,7 +9,7 @@ class AuthViewModel: ObservableObject {
     @Published var userProfile: UserProfile? = nil
     @Published var errorMessage: String? = nil
     @Published var isLoading: Bool = false
-    @Published var didJustSignOut: Bool = false
+
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private var profileListener: ListenerRegistration?
@@ -201,7 +201,6 @@ class AuthViewModel: ObservableObject {
             currentUser = nil
             userProfile = nil
             isAuthenticated = false
-            didJustSignOut = true
         } catch {
             errorMessage = "Failed to sign out. Please try again."
         }

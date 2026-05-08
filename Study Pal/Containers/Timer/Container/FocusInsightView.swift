@@ -3,6 +3,7 @@ import SwiftUI
 struct FocusInsightsView: View {
     @Environment(\.dismiss) var dismiss
     @State private var selectedTab = "Overview"
+    @StateObject private var viewModel = FocusInsightsViewModel()
     
     var body: some View {
         VStack(spacing: 15) {
@@ -29,9 +30,9 @@ struct FocusInsightsView: View {
             
             ScrollView(showsIndicators: false) {
                 if selectedTab == "Overview" {
-                    FocusOverview()
+                    FocusOverview(viewModel: viewModel)
                 } else {
-                    FocusPatternsView()
+                    FocusPatternsView(viewModel: viewModel)
                 }
                 Spacer(minLength: 20)
             }

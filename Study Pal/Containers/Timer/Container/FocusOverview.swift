@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FocusOverview: View {
+    @ObservedObject var viewModel: FocusInsightsViewModel
+    
     var body: some View {
         VStack(spacing: 15) {
             // Focus Time Card
@@ -11,7 +13,7 @@ struct FocusOverview: View {
                     VStack(alignment: .leading) {
                         Image(systemName: "clock").font(.title2)
                         Spacer()
-                        Text("2h 30m").font(.system(size: 28, weight: .bold))
+                        Text(viewModel.totalFocusTime).font(.system(size: 28, weight: .bold))
                         Text("Total Focus time").font(.subheadline)
                     }
                     .foregroundColor(.white).padding(), alignment: .leading
@@ -25,7 +27,7 @@ struct FocusOverview: View {
                     VStack(alignment: .leading) {
                         Image(systemName: "scope").font(.title2)
                         Spacer()
-                        Text("7/10").font(.system(size: 28, weight: .bold))
+                        Text(viewModel.averageFocusScore).font(.system(size: 28, weight: .bold))
                         Text("Average focus score").font(.subheadline)
                     }
                     .foregroundColor(.white).padding(), alignment: .leading
@@ -37,16 +39,33 @@ struct FocusOverview: View {
                 .padding(.top)
 
             VStack(spacing: 0) {
-                sessionRow(title: "Mathematics", date: "03/23/2026", time: "25 min", score: "10/10")
-                Divider().padding(.horizontal)
-                sessionRow(title: "History", date: "03/22/2026", time: "18 min", score: "7/10")
-                Divider().padding(.horizontal)
-                sessionRow(title: "Chemistry", date: "03/22/2026", time: "18 min", score: "7/10")
+                if viewModel.recentSessions.isEmpty {
+                    Text("No sessions recorded yet")
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    ForEach(viewModel.recentSessions) { session in
+                        sessionRow(
+                            title: session.taskTitle ?? "General Focus",
+                            date: session.date.formatted(date: .numeric, time: .omitted),
+                            time: "\(session.duration / 60) min",
+                            score: calculateScore(duration: session.duration)
+                        )
+                        if session.id != viewModel.recentSessions.last?.id {
+                            Divider().padding(.horizontal)
+                        }
+                    }
+                }
             }
             .background(Color.white)
             .cornerRadius(20)
         }
         .padding(.horizontal)
+    }
+    
+    private func calculateScore(duration: Int) -> String {
+        let score = min(10, Int((Double(duration) / 1500.0) * 10))
+        return "\(score)/10"
     }
     
     private func sessionRow(title: String, date: String, time: String, score: String) -> some View {

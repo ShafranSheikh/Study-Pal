@@ -184,13 +184,6 @@ struct LoginView: View {
         .alert(forgotMessage, isPresented: $showForgotAlert) {
             Button("OK", role: .cancel) {}
         }
-        .onAppear {
-            if authViewModel.isBiometricEnabled && !authViewModel.isAuthenticated && !authViewModel.didJustSignOut {
-                if KeychainHelper.shared.read(service: "study-pal-auth", account: "email") != nil {
-                    authViewModel.signInWithBiometrics()
-                }
-            }
-            authViewModel.didJustSignOut = false
-        }
+
     }
 }
