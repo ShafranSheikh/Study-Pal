@@ -2,7 +2,7 @@ import AppIntents
 import FirebaseAuth
 import FirebaseFirestore
 
-// MARK: - App Intent: Add Task via Siri
+//App Intent: Add Task via Siri
 
 struct AddTaskIntent: AppIntent {
 
@@ -27,7 +27,6 @@ struct AddTaskIntent: AppIntent {
     )
     var priority: TaskPriorityAppEnum
 
-    // Optional parameters — collected manually via requestValue() in perform()
     @Parameter(
         title: "Description",
         description: "Optional details about the task",
@@ -52,14 +51,10 @@ struct AddTaskIntent: AppIntent {
     }
 
     func perform() async throws -> some ProvidesDialog {
-        // Ensure user is authenticated
         guard let uid = Auth.auth().currentUser?.uid else {
             return .result(dialog: IntentDialog("You need to be signed in to Study Pal to add tasks."))
         }
 
-        // --- Collect Description ---
-        // Capture into a local constant — assigning back to @Parameter
-        // properties is unreliable; locals always hold the value correctly.
         let rawDescription: String?
         if taskDescription == nil {
             rawDescription = try await $taskDescription.requestValue(
@@ -70,7 +65,6 @@ struct AddTaskIntent: AppIntent {
         }
         let resolvedDescription = cleanOptional(rawDescription)
 
-        // --- Collect Due Date ---
         let rawDueDate: String?
         if dueDate == nil {
             rawDueDate = try await $dueDate.requestValue(
@@ -81,7 +75,6 @@ struct AddTaskIntent: AppIntent {
         }
         let resolvedDueDate = cleanOptional(rawDueDate)
 
-        // --- Write to Firestore ---
         let db = Firestore.firestore()
         let docRef = db.collection("users").document(uid).collection("tasks").document()
 
@@ -112,7 +105,6 @@ struct AddTaskIntent: AppIntent {
         return .result(dialog: IntentDialog("Done! I've added '\(taskTitle)' for \(subject)\(dateMsg) to your Study Pal tasks."))
     }
 
-    // Converts skip/none/empty answers to an empty string, keeps real values
     private func cleanOptional(_ value: String?) -> String {
         guard let v = value, !v.isEmpty else { return "" }
         let skip = ["none", "skip", "no", "n/a", "nope"]
@@ -120,7 +112,7 @@ struct AddTaskIntent: AppIntent {
     }
 }
 
-// MARK: - Enums for Task Type and Priority
+// Enums for Task Type and Priority
 
 enum TaskTypeAppEnum: String, AppEnum {
     case assignment = "Assignment"
@@ -137,7 +129,7 @@ enum TaskTypeAppEnum: String, AppEnum {
     ]
 }
 
-// "Low Priority" avoids Siri treating the single word "low" as a noise word
+
 enum TaskPriorityAppEnum: String, AppEnum {
     case low = "Low"
     case medium = "Medium"

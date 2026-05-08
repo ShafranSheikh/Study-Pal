@@ -10,12 +10,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     FirebaseApp.configure()
     
-    // Donate App Shortcuts so Siri phrases are available system-wide
     if #available(iOS 16.4, *) {
         StudyPalShortcuts.updateAppShortcutParameters()
     }
 
-    // Request notification permission and set up the delegate
     NotificationManager.shared.requestAuthorization()
 
     return true
@@ -24,7 +22,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct Study_PalApp: App {
-  // register app delegate for Firebase setup
   @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
   @StateObject private var authViewModel = AuthViewModel()
 

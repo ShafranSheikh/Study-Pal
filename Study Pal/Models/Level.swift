@@ -10,11 +10,10 @@ struct Level: Codable {
     }
     
     static func calculateLevel(from xp: Int) -> Int {
-        // Base XP per level: 1000
         return (xp / 1000) + 1
     }
     
     static func xpForNextLevel(level: Int) -> Int {
-        return 1000 // Constant for now, or could be level * 1000
+        return 1000
     }
 }

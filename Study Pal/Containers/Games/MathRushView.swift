@@ -1,12 +1,7 @@
 import SwiftUI
 
-// MARK: - MathRushView
-/// Math Rush game — starts when the user taps "Start Game".
-/// Presents random arithmetic questions. Player picks True or False.
-/// 60-second countdown. Streak tracked. Result saved to Firestore.
 struct MathRushView: View {
 
-    // MARK: - State
     @StateObject private var gameVM = GameViewModel()
     @Environment(\.dismiss) private var dismiss
 
@@ -28,7 +23,6 @@ struct MathRushView: View {
 
     private let gameDuration = 60
 
-    // MARK: - Body
     var body: some View {
         ZStack {
             GameBaseLayout(
@@ -66,7 +60,6 @@ struct MathRushView: View {
         .animation(.easeInOut(duration: 0.3), value: gameState == .finished)
     }
 
-    // MARK: - Game Area
     @ViewBuilder
     private var gameArea: some View {
         switch gameState {
@@ -100,7 +93,6 @@ struct MathRushView: View {
 
     private var playingScreen: some View {
         VStack(spacing: 24) {
-            // Question card
             VStack(spacing: 12) {
                 Text("Is this correct?")
                     .font(.caption)
@@ -121,7 +113,6 @@ struct MathRushView: View {
             )
             .animation(.easeInOut(duration: 0.2), value: feedbackColor)
 
-            // True / False buttons
             HStack(spacing: 16) {
                 AnswerButton(label: "✓ True", color: .green) { submitAnswer(true) }
                 AnswerButton(label: "✗ False", color: .red) { submitAnswer(false) }
@@ -129,8 +120,6 @@ struct MathRushView: View {
         }
         .padding()
     }
-
-    // MARK: - Game Logic
 
     private func startGame() {
         score = 0
@@ -154,7 +143,6 @@ struct MathRushView: View {
         let ops: [(String, Int)] = [("+", a + b), ("-", a - b), ("×", a * b)]
         let (opSymbol, realAnswer) = ops.randomElement()!
 
-        // 50% chance the displayed answer is wrong
         let showWrong = Bool.random()
         let displayedAnswer: Int
         if showWrong {
@@ -173,7 +161,7 @@ struct MathRushView: View {
         if playerAnswer == correctAnswer {
             streak += 1
             correctAnswers += 1
-            let bonus = streak >= 3 ? 20 : 10   // streak bonus
+            let bonus = streak >= 3 ? 20 : 10 
             score += bonus
             flashFeedback(.green)
         } else {
@@ -222,7 +210,7 @@ struct MathRushView: View {
     }
 }
 
-// MARK: - Reusable Answer Button
+
 private struct AnswerButton: View {
     let label: String
     let color: Color

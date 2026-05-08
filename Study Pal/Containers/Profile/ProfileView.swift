@@ -45,7 +45,7 @@ struct ProfileView: View {
                             .font(.system(size: 32, weight: .bold))
                             .padding(.horizontal)
 
-                        // MARK: - Profile Card
+                        // Profile Card
                         VStack(spacing: 20) {
                             HStack(alignment: .top) {
                                 // Avatar
@@ -80,7 +80,6 @@ struct ProfileView: View {
                                 }
                             }
 
-                            // XP Progress Bar
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
                                     Text("Level \(userLevel)")
@@ -118,7 +117,7 @@ struct ProfileView: View {
                         .cornerRadius(25)
                         .padding(.horizontal)
 
-                        // MARK: - Personalization Section
+                        // Personalization Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Personalization")
                                 .font(.headline)
@@ -142,7 +141,7 @@ struct ProfileView: View {
                             .padding(.horizontal)
                         }
 
-                        // MARK: - Settings Section
+                        // Settings Section
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Settings")
                                 .font(.headline)
@@ -155,7 +154,6 @@ struct ProfileView: View {
                                         if newValue {
                                             notificationManager.requestAuthorization()
                                         } else {
-                                            // Cannot revoke permission programmatically; open Settings
                                             if let url = URL(string: UIApplication.openSettingsURLString) {
                                                 UIApplication.shared.open(url)
                                             }
@@ -193,7 +191,7 @@ struct ProfileView: View {
                             Text("Please enter your password to securely enable FaceID / TouchID.")
                         }
 
-                        // MARK: - Log Out Button
+                        // Log Out Button
                         Button(action: {
                             authViewModel.signOut()
                         }) {
@@ -221,7 +219,6 @@ struct ProfileView: View {
                 }
             }
         }
-        // Sync local state when Firestore profile loads or changes
         .onReceive(authViewModel.$userProfile) { profile in
             if let profile = profile {
                 selectedAvatar = profile.avatarIcon
@@ -230,7 +227,7 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Save personalization back to Firestore
+    // Save personalization back to Firestore
     private func saveAvatar() {
         authViewModel.updateUserProfile(fields: ["avatarIcon": selectedAvatar])
     }
@@ -239,7 +236,7 @@ struct ProfileView: View {
         authViewModel.updateUserProfile(fields: ["themeColor": selectedThemeColor.toHex() ?? "#007AFF"])
     }
 
-    // MARK: - Helper Views
+    // Helper Views
     struct SettingsRow: View {
         let icon: String
         let title: String

@@ -1,11 +1,5 @@
 import SwiftUI
 
-// MARK: - FlashCardsView
-/// Displays flash cards fetched from Firestore.
-/// - "Answer" button: shown when the card has NOT been answered yet.
-/// - "View Answer" button: shown when the card HAS been answered. Opens a sheet
-///   that shows both the question AND the stored answer.
-/// - Swiping left deletes a card.
 struct FlashCardsView: View {
 
     @Environment(\.dismiss) var dismiss
@@ -16,20 +10,16 @@ struct FlashCardsView: View {
     @State private var showAnswerSheet = false
     @State private var selectedTab = "All subjects"
 
-    // MARK: - Subject Tabs
     var subjects: [String] {
         let base = ["All subjects"]
         let unique = Array(Set(viewModel.cards.map { $0.subject })).sorted()
         return base + unique
     }
 
-    // MARK: - Filtered Cards
     var filteredCards: [FlashCardItem] {
         if selectedTab == "All subjects" { return viewModel.cards }
         return viewModel.cards.filter { $0.subject == selectedTab }
     }
-
-    // MARK: - Body
     var body: some View {
         NavigationStack {
             ZStack {
@@ -42,23 +32,22 @@ struct FlashCardsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
 
-                            // ── Header ──────────────────────────────────────
+                            // Header
                             headerRow
 
-                            // ── Stats ────────────────────────────────────────
+                            // Stats
                             statsRow
 
-                            // ── Subject Filter Tabs ──────────────────────────
+                            // Subject Filter Tabs
                             subjectTabs
 
-                            // ── Card List ────────────────────────────────────
+                            // Card List
                             cardList
                         }
                         .padding(.vertical)
                     }
                 }
             }
-            // Navigate to Create Page
             .navigationDestination(isPresented: $showAddCard) {
                 AddFlashCardView(viewModel: viewModel)
             }
@@ -72,7 +61,6 @@ struct FlashCardsView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - Header Row
     private var headerRow: some View {
         HStack {
             Button(action: { dismiss() }) {
@@ -109,7 +97,6 @@ struct FlashCardsView: View {
         .padding(.top, 10)
     }
 
-    // MARK: - Stats Row
     private var statsRow: some View {
         HStack(spacing: 15) {
             StatCardView(
@@ -131,7 +118,6 @@ struct FlashCardsView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Subject Tabs
     private var subjectTabs: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
@@ -160,7 +146,6 @@ struct FlashCardsView: View {
         }
     }
 
-    // MARK: - Card List
     private var cardList: some View {
         VStack(spacing: 16) {
             if filteredCards.isEmpty {
@@ -187,7 +172,6 @@ struct FlashCardsView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Empty State
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "rectangle.on.rectangle.slash")
@@ -205,10 +189,6 @@ struct FlashCardsView: View {
     }
 }
 
-// MARK: - FlashCardRow
-/// A single card row. The button label is dynamic:
-/// • "Answer"      — card has NOT been answered
-/// • "View Answer" — card HAS been answered (persisted in Firestore)
 private struct FlashCardRow: View {
     let card: FlashCardItem
     let onAnswerTapped: () -> Void
@@ -237,7 +217,7 @@ private struct FlashCardRow: View {
 
                 Spacer()
 
-                // Answered badge
+                
                 if card.isAnswered {
                     Label("Answered", systemImage: "checkmark.circle.fill")
                         .font(.caption2.bold())
@@ -249,7 +229,7 @@ private struct FlashCardRow: View {
             Text(card.question)
                 .font(.body.bold())
 
-            // Dynamic button
+            
             Button(action: onAnswerTapped) {
                 Text(card.isAnswered ? "View Answer" : "Answer")
                     .font(.headline)
@@ -267,10 +247,7 @@ private struct FlashCardRow: View {
     }
 }
 
-// MARK: - AnswerSheet
-/// Bottom sheet with two modes:
-///  • **Not answered** → TextEditor so the user can type their answer → "Submit Answer" saves to Firestore
-///  • **Already answered** → Displays the previously saved answer
+
 private struct AnswerSheet: View {
     let card: FlashCardItem
     let viewModel: FlashCardViewModel
@@ -304,7 +281,6 @@ private struct AnswerSheet: View {
             .cornerRadius(12)
 
             if card.isAnswered {
-                // ── View Answer mode ────────────────────────────────────
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Your Answer", systemImage: "lightbulb.fill")
                         .font(.caption.bold())
@@ -341,7 +317,6 @@ private struct AnswerSheet: View {
                 }
 
             } else {
-                // ── Answer mode ──────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Your Answer", systemImage: "pencil")
                         .font(.caption.bold())
@@ -410,7 +385,6 @@ private struct AnswerSheet: View {
 }
 
 
-// MARK: - StatCardView (preserved from original)
 struct StatCardView: View {
     var title: String
     var subtitle: String

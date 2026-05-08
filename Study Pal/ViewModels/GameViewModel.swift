@@ -3,28 +3,24 @@ import Combine
 import FirebaseFirestore
 import FirebaseAuth
 
-// MARK: - GameViewModel
-/// Saves game results to Firestore and fetches the user's high scores.
-/// Uses addDocument(data:) with a plain dictionary for maximum reliability.
+// GameViewModel
 class GameViewModel: ObservableObject {
 
-    // MARK: - Published State
-    @Published var highScores: [String: Int] = [:]  // gameType -> best score
+    // Published State
+    @Published var highScores: [String: Int] = [:]  
     @Published var isSaving: Bool = false
     @Published var errorMessage: String? = nil
 
     private let db = Firestore.firestore()
 
-    // MARK: - Game Type Constants
+    // Game Type Constants
     static let memoryMatch = "memoryMatch"
     static let speedClick  = "speedClick"
     static let mathRush    = "mathRush"
     static let colorMatch  = "colorMatch"
 
-    // MARK: - Save Result
-    /// Writes a completed game result to users/{uid}/gameResults.
-    /// Uses addDocument(data:) with a plain [String: Any] dictionary to avoid
-    /// Codable/Timestamp encoding issues that can silently fail.
+    // Save Result
+    
     func saveResult(_ result: GameResult, completion: ((Error?) -> Void)? = nil) {
         guard let uid = Auth.auth().currentUser?.uid else {
             print("⚠️ GameViewModel.saveResult: No authenticated user — skipping save.")
@@ -46,21 +42,21 @@ class GameViewModel: ObservableObject {
                     self?.isSaving = false
 
                     if let error = error {
-                        print("⚠️ GameViewModel.saveResult: Firestore write failed — \(error.localizedDescription)")
+                        print(" GameViewModel.saveResult: Firestore write failed — \(error.localizedDescription)")
                         self?.errorMessage = "Could not save result: \(error.localizedDescription)"
                         completion?(error)
                         return
                     }
 
-                    print("✅ GameViewModel.saveResult: Result saved for \(result.gameType) — score: \(result.score)")
+                    print(" GameViewModel.saveResult: Result saved for \(result.gameType) — score: \(result.score)")
 
-                    // Award XP proportional to score (min 25 XP)
+                    
                     let xpToAward = max(25, (result.score / 10) * 5)
                     UserService.shared.addXP(uid: uid, amount: xpToAward) { xpError in
                         if let xpError = xpError {
-                            print("⚠️ GameViewModel: XP award failed — \(xpError.localizedDescription)")
+                            print(" GameViewModel: XP award failed — \(xpError.localizedDescription)")
                         } else {
-                            print("✅ GameViewModel: +\(xpToAward) XP awarded to \(uid)")
+                            print("GameViewModel: +\(xpToAward) XP awarded to \(uid)")
                         }
                     }
 
@@ -71,11 +67,11 @@ class GameViewModel: ObservableObject {
             }
     }
 
-    // MARK: - Fetch High Scores
-    /// Reads all gameResult documents for the current user and returns the max score per game type.
+    // Fetch High Scores
+    
     func fetchHighScores() {
         guard let uid = Auth.auth().currentUser?.uid else {
-            print("⚠️ GameViewModel.fetchHighScores: No authenticated user.")
+            print("GameViewModel.fetchHighScores: No authenticated user.")
             return
         }
 
@@ -84,7 +80,7 @@ class GameViewModel: ObservableObject {
             .collection("gameResults")
             .getDocuments { [weak self] snapshot, error in
                 if let error = error {
-                    print("⚠️ GameViewModel.fetchHighScores: \(error.localizedDescription)")
+                    print(" GameViewModel.fetchHighScores: \(error.localizedDescription)")
                     return
                 }
 
@@ -100,7 +96,7 @@ class GameViewModel: ObservableObject {
 
                 DispatchQueue.main.async {
                     self?.highScores = best
-                    print("✅ GameViewModel.fetchHighScores: \(best)")
+                    print(" GameViewModel.fetchHighScores: \(best)")
                 }
             }
     }

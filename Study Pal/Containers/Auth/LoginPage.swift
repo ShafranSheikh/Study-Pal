@@ -23,7 +23,6 @@ struct LoginView: View {
             }
             .frame(maxHeight: .infinity)
 
-            // Bottom Blue Area
             VStack(alignment: .leading, spacing: 20) {
 
                 // Header
@@ -130,7 +129,6 @@ struct LoginView: View {
                 }
                 .foregroundColor(.white)
 
-                // Apple Sign In Button (placeholder for Sign in with Apple)
                 Button(action: {}) {
                     HStack {
                         Image(systemName: "applelogo")
@@ -188,12 +186,10 @@ struct LoginView: View {
         }
         .onAppear {
             if authViewModel.isBiometricEnabled && !authViewModel.isAuthenticated && !authViewModel.didJustSignOut {
-                // Check if we have credentials in keychain before prompting
                 if KeychainHelper.shared.read(service: "study-pal-auth", account: "email") != nil {
                     authViewModel.signInWithBiometrics()
                 }
             }
-            // Reset the flag so that next time (e.g. app restart) it can auto-login
             authViewModel.didJustSignOut = false
         }
     }

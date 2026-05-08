@@ -12,7 +12,6 @@ struct TimerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Using your specific background color
             Color.gray.opacity(0.09)
                 .ignoresSafeArea()
             
@@ -157,7 +156,6 @@ struct TimerView: View {
     }
 }
 
-// MARK: - Subcomponents
 
 struct TimerModeCard: View {
     let title: String

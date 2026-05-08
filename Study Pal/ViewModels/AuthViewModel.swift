@@ -14,7 +14,7 @@ class AuthViewModel: ObservableObject {
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private var profileListener: ListenerRegistration?
 
-    // MARK: - Biometric Settings
+    // Biometric Settings
     @Published var isBiometricEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isBiometricEnabled, forKey: "isBiometricEnabled")
@@ -44,7 +44,7 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Real-time profile listener (auto-updates UI)
+    
     private func startListeningToProfile(uid: String) {
         let listener = UserService.shared.listenToProfile(uid: uid) { [weak self] profile in
             DispatchQueue.main.async {
@@ -54,7 +54,7 @@ class AuthViewModel: ObservableObject {
         profileListener = listener
     }
 
-    // MARK: - Sign In
+    
     func signIn(email: String, password: String) {
         guard !email.isEmpty, !password.isEmpty else {
             errorMessage = "Please fill in all fields."
@@ -72,7 +72,7 @@ class AuthViewModel: ObservableObject {
                     self?.currentUser = result?.user
                     self?.isAuthenticated = true
                     
-                    // If biometric is enabled, save credentials
+                    
                     if self?.isBiometricEnabled == true {
                         self?.saveCredentialsToKeychain(email: email, password: password)
                     }
@@ -81,7 +81,7 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Biometric Sign In
+    //Biometric Sign In
     func signInWithBiometrics() {
         // Pre-check credentials
         guard KeychainHelper.shared.read(service: "study-pal-auth", account: "email") != nil,
@@ -114,7 +114,6 @@ class AuthViewModel: ObservableObject {
         }
         
         isLoading = true
-        // Re-authenticate to verify password
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
             DispatchQueue.main.async {
                 self?.isLoading = false
@@ -143,7 +142,7 @@ class AuthViewModel: ObservableObject {
         KeychainHelper.shared.delete(service: "study-pal-auth", account: "password")
     }
 
-    // MARK: - Sign Up (creates Firestore profile)
+    
     func signUp(email: String, password: String, confirmPassword: String,
                 firstName: String, lastName: String,
                 dateOfBirth: String = "", gender: String = "Other") {
@@ -168,12 +167,12 @@ class AuthViewModel: ObservableObject {
                 if let error = error {
                     self?.errorMessage = self?.friendlyError(error)
                 } else if let user = result?.user {
-                    // Set display name
+                    
                     let changeRequest = user.createProfileChangeRequest()
                     changeRequest.displayName = "\(firstName) \(lastName)"
                     changeRequest.commitChanges { _ in }
 
-                    // Create Firestore profile document for this user
+                    
                     let profile = UserProfile.defaultProfile(
                         uid: user.uid,
                         firstName: firstName,
@@ -184,7 +183,7 @@ class AuthViewModel: ObservableObject {
                     )
                     UserService.shared.createProfile(profile) { err in
                         if let err = err {
-                            print("⚠️ Profile creation error: \(err)")
+                            print("Profile creation error: \(err)")
                         }
                     }
 
@@ -195,7 +194,7 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Sign Out
+    // Sign Out
     func signOut() {
         do {
             try Auth.auth().signOut()
@@ -208,7 +207,7 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Password Reset
+    // Password Reset
     func sendPasswordReset(email: String, completion: @escaping (String) -> Void) {
         guard !email.isEmpty else {
             completion("Please enter your email address.")
@@ -223,13 +222,13 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Update profile fields
+    // Update profile fields
     func updateUserProfile(fields: [String: Any]) {
         guard let uid = currentUser?.uid else { return }
         UserService.shared.updateProfile(uid: uid, fields: fields)
     }
 
-    // MARK: - Error Helpers
+    // Error Helpers
     private func friendlyError(_ error: Error) -> String {
         let err = error as NSError
         switch AuthErrorCode(rawValue: err.code) {
@@ -240,8 +239,8 @@ class AuthViewModel: ObservableObject {
         case .weakPassword:      return "Password is too weak. Use at least 6 characters."
         case .networkError:      return "Network error. Please check your connection."
         default:
-            print("⚠️ Firebase Auth Error: \(err.code) — \(error.localizedDescription)")
-            print("⚠️ Full error: \(err)")
+            print("Firebase Auth Error: \(err.code) — \(error.localizedDescription)")
+            print("Full error: \(err)")
             return error.localizedDescription
         }
     }

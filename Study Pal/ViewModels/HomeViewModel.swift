@@ -8,7 +8,7 @@ class HomeViewModel: ObservableObject {
     @Published var upcomingTasks: [StudyTask] = []
     @Published var inProgressTasks: [StudyTask] = []
     @Published var completedToday: Int = 0
-    @Published var focusTimeToday: Int = 0 // in minutes
+    @Published var focusTimeToday: Int = 0 
     
     private var db = Firestore.firestore()
     private var cancellables = Set<AnyCancellable>()
@@ -28,7 +28,7 @@ class HomeViewModel: ObservableObject {
         // Reset streak if missed
         UserService.shared.checkStreakReset(uid: uid)
         
-        // Fetch Today's Focus Time from timer_records
+        
         let calendar = Calendar.current
         let startOfToday = calendar.startOfDay(for: Date())
         
@@ -81,7 +81,7 @@ class HomeViewModel: ObservableObject {
     }
     
     var focusScore: Int {
-        // Simple logic: 12 minutes of focus = 1 point, max 10 points
+        
         return min(10, focusTimeToday / 12)
     }
 }

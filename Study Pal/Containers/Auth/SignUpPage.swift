@@ -17,16 +17,13 @@ struct SignUpView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
-                // Master Background
                 Color.white.ignoresSafeArea()
                 
-                // Underlay for scroll bounce at bottom
                 VStack {
                     Spacer()
                     Color.blue.frame(height: geometry.size.height / 2).ignoresSafeArea()
                 }
                 
-                // Top Navigation Bar
                 HStack {
                     Button(action: {
                         dismiss()
@@ -47,11 +44,9 @@ struct SignUpView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         
-                        // Empty space for white header
                         Spacer()
                             .frame(height: 80)
                         
-                        // The Blue Form Container
                         VStack(alignment: .leading, spacing: 25) {
                             
                             // Header Text
@@ -66,13 +61,11 @@ struct SignUpView: View {
                             .padding(.top, 40)
                             
                             VStack(spacing: 18) {
-                                // Custom input fields
                                 CustomSignUpField(title: "First Name", placeholder: "Jhon", text: $firstName)
                                 CustomSignUpField(title: "Last Name", placeholder: "Doe", text: $lastName)
                                 CustomSignUpField(title: "Email", placeholder: "jhondoe@mail.com", text: $email, keyboardType: .emailAddress)
                                 CustomSignUpField(title: "Date of Birth", placeholder: "yyyy-mm-dd", text: $dateOfBirth)
                                 
-                                // Gender Picker
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Gender")
                                         .foregroundColor(.white)
@@ -164,7 +157,7 @@ struct SignUpView: View {
                             }
                             .font(.subheadline)
                             .padding(.top, 10)
-                            .padding(.bottom, 60) // Extra padding for safe area
+                            .padding(.bottom, 60) 
                             
                         }
                         .padding(.horizontal, 30)

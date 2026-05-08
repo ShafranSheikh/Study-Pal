@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Memory Match Card Model
 private struct MemoryCard: Identifiable {
     let id: Int
     let emoji: String
@@ -8,22 +7,16 @@ private struct MemoryCard: Identifiable {
     var isMatched: Bool = false
 }
 
-// MARK: - MemoryMatchView
-/// Memory Match game — starts immediately on appear.
-/// A 4×4 grid of 8 emoji pairs. Player flips cards to find matches.
-/// Score = matches found; Time counts up; Moves tracked.
-/// Result is saved to Firestore on completion.
 struct MemoryMatchView: View {
 
-    // MARK: - State
     @StateObject private var gameVM = GameViewModel()
     @Environment(\.dismiss) private var dismiss
 
     private let emojis = ["🧠", "📚", "🎓", "✏️", "🔬", "💡", "📝", "🖊️"]
 
     @State private var cards: [MemoryCard] = []
-    @State private var firstFlipped: Int? = nil   // index of first flipped card
-    @State private var isLocked: Bool = false      // prevent tapping during mismatch delay
+    @State private var firstFlipped: Int? = nil
+    @State private var isLocked: Bool = false
     @State private var moves: Int = 0
     @State private var matchesFound: Int = 0
     @State private var timeElapsed: Int = 0
@@ -32,7 +25,6 @@ struct MemoryMatchView: View {
     @State private var savedResult: GameResult? = nil
     @State private var xpAwarded: Int = 0
 
-    // MARK: - Body
     var body: some View {
         ZStack {
             GameBaseLayout(
@@ -49,7 +41,6 @@ struct MemoryMatchView: View {
                 cardGrid
             }
 
-            // Result overlay when game is won
             if gameFinished, let result = savedResult {
                 GameResultOverlay(
                     title: "Memory Match",
@@ -71,7 +62,6 @@ struct MemoryMatchView: View {
         .animation(.easeInOut(duration: 0.3), value: gameFinished)
     }
 
-    // MARK: - Card Grid
     private var cardGrid: some View {
         LazyVGrid(
             columns: Array(repeating: GridItem(.flexible()), count: 4),
@@ -85,11 +75,8 @@ struct MemoryMatchView: View {
         .padding()
     }
 
-    // MARK: - Game Logic
-
     private func resetGame() {
         stopTimer()
-        // Build shuffled deck of 8 pairs
         let pairs = emojis.flatMap { [$0, $0] }.shuffled()
         cards = pairs.enumerated().map { MemoryCard(id: $0.offset, emoji: $0.element) }
         firstFlipped = nil
@@ -106,17 +93,13 @@ struct MemoryMatchView: View {
         guard !isLocked,
               !card.isFaceUp,
               !card.isMatched else { return }
-
-        // Flip card face up
         cards[card.id].isFaceUp = true
 
         if let first = firstFlipped {
-            // Second card flipped – check for match
             moves += 1
             isLocked = true
 
             if cards[first].emoji == card.emoji {
-                // Match!
                 cards[first].isMatched = true
                 cards[card.id].isMatched = true
                 matchesFound += 1
@@ -127,7 +110,6 @@ struct MemoryMatchView: View {
                     finishGame()
                 }
             } else {
-                // No match – flip both back after delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     cards[first].isFaceUp = false
                     cards[card.id].isFaceUp = false
@@ -142,7 +124,6 @@ struct MemoryMatchView: View {
 
     private func finishGame() {
         stopTimer()
-        // Score formula: penalise for moves, reward for fast time
         let baseScore = 800
         let movePenalty = max(0, (moves - 8) * 10)
         let timePenalty = max(0, (timeElapsed - 30) * 2)
@@ -162,7 +143,6 @@ struct MemoryMatchView: View {
         withAnimation { gameFinished = true }
     }
 
-    // MARK: - Timer Helpers
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             timeElapsed += 1
@@ -181,7 +161,6 @@ struct MemoryMatchView: View {
     }
 }
 
-// MARK: - Card View
 private struct CardView: View {
     let card: MemoryCard
 

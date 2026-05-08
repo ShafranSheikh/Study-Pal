@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
+    @State private var showNotifications = false
+    @ObservedObject private var notificationManager = NotificationManager.shared
     
     var body: some View {
         NavigationStack {
@@ -10,7 +12,7 @@ struct HomeView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        HeaderView(profile: viewModel.userProfile, progress: viewModel.levelProgress)
+                        HeaderView(profile: viewModel.userProfile, progress: viewModel.levelProgress, showNotifications: $showNotifications)
                         StreakCard(streak: viewModel.userProfile?.currentStreak ?? 0)
                         
                         HStack(spacing: 15) {
@@ -46,6 +48,9 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .sheet(isPresented: $showNotifications) {
+                NotificationView()
+            }
         }
     }
 }
@@ -55,6 +60,8 @@ struct HomeView: View {
 struct HeaderView: View {
     let profile: UserProfile?
     let progress: Double
+    @Binding var showNotifications: Bool
+    @ObservedObject private var notificationManager = NotificationManager.shared
     
     var body: some View {
         HStack(alignment: .top) {
@@ -66,10 +73,26 @@ struct HeaderView: View {
             }
             Spacer()
             VStack(alignment: .trailing) {
-                HStack(spacing: 8) {
+                HStack(spacing: 12) {
                     Text("Level \(profile?.level ?? 1)").font(.subheadline).bold()
-                    Image(systemName: "bell")
-                        .font(.title3)
+                    
+                    Button(action: {
+                        showNotifications = true
+                        notificationManager.markAllAsRead()
+                    }) {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "bell")
+                                .font(.title3)
+                                .foregroundColor(.primary)
+                            
+                            if notificationManager.unreadCount > 0 {
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: 2, y: -2)
+                            }
+                        }
+                    }
                 }
                 Capsule()
                     .fill(Color.gray.opacity(0.2))

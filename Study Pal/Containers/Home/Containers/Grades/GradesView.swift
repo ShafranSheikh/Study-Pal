@@ -1,9 +1,6 @@
 import SwiftUI
 
-// MARK: - GradesView
-/// Displays subject-level grade summaries fetched from Firestore via GradeViewModel.
-/// Each subject card shows the average score, target, and most recent event.
-/// Swipe left on a subject row to delete all entries for that subject.
+
 struct GradesView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = GradeViewModel()
@@ -20,13 +17,13 @@ struct GradesView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
 
-                        // ── Header ──────────────────────────────────────────
+                        // Header
                         headerRow
 
-                        // ── Overall Performance Banner ───────────────────────
+                        // Overall Performance Banner
                         overallBanner
 
-                        // ── Subject Cards ────────────────────────────────────
+                        // Subject Cards
                         if viewModel.subjectSummaries.isEmpty {
                             emptyState
                         } else {
@@ -43,7 +40,7 @@ struct GradesView: View {
         }
     }
 
-    // MARK: - Header
+    // Header
     private var headerRow: some View {
         HStack {
             Button { dismiss() } label: {
@@ -66,7 +63,7 @@ struct GradesView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Overall Banner
+    // Overall Banner
     private var overallBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -95,7 +92,7 @@ struct GradesView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Subject List
+    // Subject List
     private var subjectList: some View {
         VStack(spacing: 15) {
             ForEach(viewModel.subjectSummaries) { summary in
@@ -112,7 +109,7 @@ struct GradesView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Empty State
+    // Empty State
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "chart.bar.xaxis")
@@ -129,14 +126,12 @@ struct GradesView: View {
         .padding(.vertical, 50)
     }
 
-    // MARK: - Delete all entries for a subject
     private func deleteSubject(_ summary: SubjectSummary) {
         summary.entries.forEach { viewModel.deleteGrade($0) }
     }
 }
 
-// MARK: - SubjectCard
-/// Displays averaged score, target, progress bar and most recent event for one subject.
+
 private struct SubjectCard: View {
     let summary: SubjectSummary
 

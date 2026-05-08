@@ -4,27 +4,24 @@ import FirebaseFirestore
 import FirebaseAuth
 import SwiftUI
 
-// MARK: - SubjectSummary
-/// Aggregated view of all GradeEntry records for one subject.
+// SubjectSummary
 struct SubjectSummary: Identifiable {
     let id = UUID()
     let name: String
-    let averagePercentage: Double   // 0–100
-    let target: Double              // latest target for this subject
-    let recentEvent: String         // name of most recent entry
-    let recentDate: String          // date of most recent entry
-    let color: Color                // derived from colorHex of any entry
-    let entries: [GradeEntry]       // all entries for this subject
+    let averagePercentage: Double   
+    let target: Double              
+    let recentEvent: String         
+    let recentDate: String          
+    let color: Color                
+    let entries: [GradeEntry]       
 
     var ratio: Double { averagePercentage / 100 }
 }
 
-// MARK: - GradeViewModel
-/// Manages grade CRUD operations against Firestore.
-/// Path: users/{uid}/grades/{entryId}
+// GradeViewModel
 class GradeViewModel: ObservableObject {
 
-    // MARK: - Published State
+    // Published State
     @Published var entries: [GradeEntry] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
@@ -40,15 +37,15 @@ class GradeViewModel: ObservableObject {
         listenerRegistration?.remove()
     }
 
-    // MARK: - Collection Reference
+    // Collection Reference
     private func collectionRef(uid: String) -> CollectionReference {
         db.collection("users").document(uid).collection("grades")
     }
 
-    // MARK: - Fetch (Real-time)
+    
     func fetchGrades() {
         guard let uid = Auth.auth().currentUser?.uid else {
-            print("⚠️ GradeViewModel.fetchGrades: No authenticated user.")
+            print(" GradeViewModel.fetchGrades: No authenticated user.")
             return
         }
 
@@ -61,7 +58,7 @@ class GradeViewModel: ObservableObject {
                     self?.isLoading = false
 
                     if let error = error {
-                        print("⚠️ GradeViewModel.fetchGrades: \(error.localizedDescription)")
+                        print(" GradeViewModel.fetchGrades: \(error.localizedDescription)")
                         self?.errorMessage = error.localizedDescription
                         return
                     }
@@ -70,12 +67,12 @@ class GradeViewModel: ObservableObject {
                         try? doc.data(as: GradeEntry.self)
                     } ?? []
 
-                    print("✅ GradeViewModel.fetchGrades: \(self?.entries.count ?? 0) entries loaded.")
+                    print(" GradeViewModel.fetchGrades: \(self?.entries.count ?? 0) entries loaded.")
                 }
             }
     }
 
-    // MARK: - Add Grade
+    // Add Grade
     func addGrade(_ entry: GradeEntry, completion: ((Error?) -> Void)? = nil) {
         guard let uid = Auth.auth().currentUser?.uid else {
             completion?(authError())
@@ -92,20 +89,20 @@ class GradeViewModel: ObservableObject {
         do {
             try collectionRef(uid: uid).addDocument(from: entry) { error in
                 if let error = error {
-                    print("⚠️ GradeViewModel.addGrade: \(error.localizedDescription)")
+                    print(" GradeViewModel.addGrade: \(error.localizedDescription)")
                     completion?(error)
                 } else {
-                    print("✅ GradeViewModel.addGrade: Grade added.")
+                    print(" GradeViewModel.addGrade: Grade added.")
                     completion?(nil)
                 }
             }
         } catch {
-            print("⚠️ GradeViewModel.addGrade: Encoding error — \(error.localizedDescription)")
+            print(" GradeViewModel.addGrade: Encoding error — \(error.localizedDescription)")
             completion?(error)
         }
     }
 
-    // MARK: - Delete Grade
+    // Delete Grade
     func deleteGrade(_ entry: GradeEntry) {
         guard let uid = Auth.auth().currentUser?.uid,
               let entryId = entry.id else { return }
@@ -119,13 +116,12 @@ class GradeViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Computed: Subject Summaries
-    /// Groups all GradeEntry records by subject and computes per-subject averages.
+    // Computed: Subject Summaries
+    
     var subjectSummaries: [SubjectSummary] {
         let grouped = Dictionary(grouping: entries, by: { $0.subject })
         return grouped.map { subject, subjectEntries in
             let avgPct = subjectEntries.reduce(0.0) { $0 + $1.percentage } / Double(subjectEntries.count)
-            // Use the most recent entry (first, since sorted desc) for event/date/target/color
             let latest = subjectEntries.first!
             return SubjectSummary(
                 name: subject,
@@ -140,14 +136,14 @@ class GradeViewModel: ObservableObject {
         .sorted { $0.name < $1.name }
     }
 
-    // MARK: - Computed: Overall Average
-    /// Mean percentage across all grade entries.
+    // Computed: Overall Average
+    
     var overallAverage: Double {
         guard !entries.isEmpty else { return 0 }
         return entries.reduce(0.0) { $0 + $1.percentage } / Double(entries.count)
     }
 
-    // MARK: - Error Helpers
+    // Error Helpers
     private func authError() -> NSError {
         NSError(domain: "GradeViewModel", code: 401,
                 userInfo: [NSLocalizedDescriptionKey: "User not authenticated."])

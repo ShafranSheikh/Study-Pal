@@ -1,7 +1,5 @@
 import SwiftUI
 
-// Removed local Task model to use StudyTask from Models
-
 struct TasksView: View {
     @State private var searchText = ""
     @State private var selectedTab = "To Do"
@@ -28,7 +26,7 @@ struct TasksView: View {
                         
                         Spacer()
                         
-                        // Use NavigationLink to push AddTaskView as a new page
+                        
                         NavigationLink(destination: AddTaskView(viewModel: viewModel)) {
                             Image(systemName: "plus")
                                 .font(.title2.bold())
@@ -86,7 +84,7 @@ struct TasksView: View {
     }
 }
 
-// MARK: - Subviews
+// Subviews
 
 struct TabButton: View {
     let title: String

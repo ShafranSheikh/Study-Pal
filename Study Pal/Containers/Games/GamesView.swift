@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Game Model
 struct Game: Identifiable {
     let id = UUID()
     let name: String
@@ -8,7 +7,7 @@ struct Game: Identifiable {
     let reward: String
     let icon: String
     let color: Color
-    let gameTypeKey: String  // matches GameViewModel constants
+    let gameTypeKey: String  
 }
 
 struct GamesView: View {
@@ -56,7 +55,7 @@ struct GamesView: View {
                     }
                     .padding(.horizontal)
 
-                    // High Scores Section — fetched from Firestore
+                    // High Scores Section
                     VStack(alignment: .leading, spacing: 15) {
                         Text("Your High Scores")
                             .font(.title2)
@@ -84,7 +83,6 @@ struct GamesView: View {
         }
     }
 
-    // MARK: - Routing Helper
     @ViewBuilder
     func destinationView(for gameName: String) -> some View {
         switch gameName {
@@ -96,8 +94,6 @@ struct GamesView: View {
         }
     }
 }
-
-// MARK: - Subviews
 
 struct GamesHeaderView: View {
     var body: some View {

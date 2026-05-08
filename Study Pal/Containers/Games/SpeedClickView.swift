@@ -1,12 +1,6 @@
 import SwiftUI
-
-// MARK: - SpeedClickView
-/// Speed Click game — starts when the user taps "Start Game".
-/// A target appears at a random position; tap it to score a point.
-/// 30-second countdown. Result saved to Firestore on completion.
 struct SpeedClickView: View {
 
-    // MARK: - State
     @StateObject private var gameVM = GameViewModel()
     @Environment(\.dismiss) private var dismiss
 
@@ -24,7 +18,6 @@ struct SpeedClickView: View {
 
     private let gameDuration = 30
 
-    // MARK: - Body
     var body: some View {
         ZStack {
             GameBaseLayout(
@@ -62,7 +55,6 @@ struct SpeedClickView: View {
         .animation(.easeInOut(duration: 0.3), value: gameState == .finished)
     }
 
-    // MARK: - Game Area
     @ViewBuilder
     private var gameArea: some View {
         switch gameState {
@@ -71,7 +63,7 @@ struct SpeedClickView: View {
         case .playing:
             playingScreen
         case .finished:
-            Color.clear.frame(height: 300) // placeholder while overlay is shown
+            Color.clear.frame(height: 300)
         }
     }
 
@@ -97,12 +89,10 @@ struct SpeedClickView: View {
     private var playingScreen: some View {
         GeometryReader { geo in
             ZStack {
-                // Miss tap zone
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture { handleMiss() }
 
-                // Target
                 Circle()
                     .fill(
                         RadialGradient(
@@ -118,7 +108,6 @@ struct SpeedClickView: View {
                     .onTapGesture { handleHit(in: geo) }
                     .animation(.spring(response: 0.2), value: targetPosition)
 
-                // Miss flash
                 if showMiss {
                     Text("Miss!")
                         .font(.caption).bold()
@@ -131,7 +120,6 @@ struct SpeedClickView: View {
         .frame(height: 320)
     }
 
-    // MARK: - Game Logic
 
     private func startGame() {
         clicks = 0
@@ -154,7 +142,6 @@ struct SpeedClickView: View {
     }
 
     private func handleMiss() {
-        // Deduct 2 points for misses, floor at 0
         score = max(0, score - 2)
         showMiss = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showMiss = false }

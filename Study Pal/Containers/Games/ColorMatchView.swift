@@ -1,13 +1,7 @@
 import SwiftUI
 
-// MARK: - ColorMatchView
-/// Color Match game — starts when user taps "Start Game".
-/// A color word is shown in a (possibly different) ink color.
-/// Player taps Yes/No: does the word MATCH its ink color?
-/// 30-second countdown. Result saved to Firestore on completion.
 struct ColorMatchView: View {
 
-    // MARK: - State
     @StateObject private var gameVM = GameViewModel()
     @Environment(\.dismiss) private var dismiss
 
@@ -22,10 +16,9 @@ struct ColorMatchView: View {
     @State private var savedResult: GameResult? = nil
     @State private var xpAwarded: Int = 0
 
-    // Current round
     @State private var wordText: String = ""
     @State private var inkColor: Color = .black
-    @State private var correctAnswer: Bool = true   // true = match, false = no match
+    @State private var correctAnswer: Bool = true   
     @State private var feedbackColor: Color? = nil
 
     private let gameDuration = 30
@@ -39,7 +32,6 @@ struct ColorMatchView: View {
         ("Orange", .orange)
     ]
 
-    // MARK: - Body
     var body: some View {
         ZStack {
             GameBaseLayout(
@@ -77,7 +69,6 @@ struct ColorMatchView: View {
         .animation(.easeInOut(duration: 0.3), value: gameState == .finished)
     }
 
-    // MARK: - Game Area
     @ViewBuilder
     private var gameArea: some View {
         switch gameState {
@@ -100,7 +91,6 @@ struct ColorMatchView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            // Example card
             VStack(spacing: 6) {
                 Text("Example:").font(.caption).foregroundColor(.secondary)
                 Text("Blue")
@@ -132,7 +122,6 @@ struct ColorMatchView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            // Word shown in its ink color
             Text(wordText)
                 .font(.system(size: 48, weight: .heavy, design: .rounded))
                 .foregroundColor(inkColor)
@@ -154,7 +143,6 @@ struct ColorMatchView: View {
         .padding()
     }
 
-    // MARK: - Game Logic
 
     private func startGame() {
         score = 0
@@ -176,12 +164,10 @@ struct ColorMatchView: View {
         let wordPair = colorPairs.randomElement()!
         wordText = wordPair.name
 
-        // 50% chance the ink color matches
         if Bool.random() {
             inkColor = wordPair.color
             correctAnswer = true
         } else {
-            // Pick a different color for the ink
             let others = colorPairs.filter { $0.name != wordPair.name }
             inkColor = others.randomElement()!.color
             correctAnswer = false
@@ -238,7 +224,6 @@ struct ColorMatchView: View {
     }
 }
 
-// MARK: - Answer Button (Color Match variant)
 private struct AnswerButton2: View {
     let label: String
     let color: Color

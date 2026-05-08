@@ -54,7 +54,6 @@ class TaskViewModel: ObservableObject {
         
         do {
             try docRef.setData(from: newTask)
-            // Send a local push notification confirming task creation
             NotificationManager.shared.sendTaskCreatedNotification(
                 title: title,
                 subject: subject,
@@ -74,7 +73,6 @@ class TaskViewModel: ObservableObject {
                 if let error = error {
                     print("Error updating task status: \(error.localizedDescription)")
                 } else if newStatus == "Done" {
-                    // Add 200 XP and update streak when task is completed
                     UserService.shared.addXP(uid: uid, amount: 200)
                     UserService.shared.updateStreak(uid: uid)
                 }

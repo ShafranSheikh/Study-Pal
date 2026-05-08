@@ -1,7 +1,5 @@
 import SwiftUI
 
-// MARK: - AddFlashCardView
-/// Form to create a new flash card and persist it to Firestore via FlashCardViewModel.
 struct AddFlashCardView: View {
 
     @Environment(\.dismiss) var dismiss
@@ -61,7 +59,7 @@ struct AddFlashCardView: View {
                     .keyboardType(.numbersAndPunctuation)
             }
 
-            // Inline error message
+            // error message
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .font(.caption)
@@ -105,7 +103,6 @@ struct AddFlashCardView: View {
         .background(Color(UIColor.systemBackground))
     }
 
-    // MARK: - Helpers
     private var canSave: Bool {
         !question.trimmingCharacters(in: .whitespaces).isEmpty &&
         !subject.trimmingCharacters(in: .whitespaces).isEmpty
@@ -117,7 +114,7 @@ struct AddFlashCardView: View {
 
         viewModel.addCard(
             question: question.trimmingCharacters(in: .whitespaces),
-            answer: "",   // answer is provided by the user when they tap Answer on the card
+            answer: "",
             subject: subject.trimmingCharacters(in: .whitespaces),
             dueDate: dueDate.trimmingCharacters(in: .whitespaces)
         ) { error in

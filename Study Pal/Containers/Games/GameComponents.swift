@@ -1,7 +1,5 @@
 import SwiftUI
 
-// MARK: - StatBox
-/// Displays a single statistic value with a label, used in the stats bar across all games.
 struct StatBox: View {
     let value: String
     let label: String
@@ -20,8 +18,6 @@ struct StatBox: View {
     }
 }
 
-// MARK: - GameBaseLayout
-/// Generic container providing the stats bar, game area, and a bottom action button.
 struct GameBaseLayout<Content: View>: View {
     let title: String
     let stats: AnyView
@@ -61,8 +57,6 @@ struct GameBaseLayout<Content: View>: View {
     }
 }
 
-// MARK: - GameResultOverlay
-/// Full-screen overlay shown when a game ends. Displays the score summary and action buttons.
 struct GameResultOverlay: View {
     let title: String
     let color: Color

@@ -1,19 +1,15 @@
 import Foundation
 import FirebaseFirestore
 
-// MARK: - FlashCardItem Model
-/// Represents a single flash card stored in Firestore.
-/// Path: users/{uid}/flashCards/{cardId}
 struct FlashCardItem: Identifiable, Codable {
     @DocumentID var id: String?
     var question: String
     var answer: String
     var subject: String
-    var dueDate: String         // stored as "yyyy-MM-dd" string (matches existing AddFlashCardView field)
-    var isAnswered: Bool        // true once the user has viewed/submitted an answer this session
+    var dueDate: String         
+    var isAnswered: Bool        
     var createdAt: Date?
 
-    /// Convenience init for creating a new card
     init(
         question: String,
         answer: String,

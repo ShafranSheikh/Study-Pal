@@ -9,7 +9,7 @@ struct StudyTask: Identifiable, Codable {
     var taskType: String
     var dueDate: String
     var priority: String
-    var status: String // e.g., "To Do", "In Progress", "Done"
-    var timeSpent: Int = 0 // Cumulative study time in seconds
-    var breakTimeSpent: Int = 0 // Cumulative break time in seconds
+    var status: String
+    var timeSpent: Int = 0 
+    var breakTimeSpent: Int = 0 
 }

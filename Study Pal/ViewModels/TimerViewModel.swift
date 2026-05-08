@@ -35,7 +35,7 @@ class TimerViewModel: ObservableObject {
     func startTimer() {
         guard !isRunning, timeRemaining > 0, !selectedTaskId.isEmpty else { return }
         
-        // If Focus mode is selected, ensure task is set to "In Progress"
+        
         if selectedMode == "Focus" {
             updateTaskStatus(to: "In Progress")
         }
@@ -78,7 +78,7 @@ class TimerViewModel: ObservableObject {
         
         if markAsDone && !selectedTaskId.isEmpty {
             updateTaskStatus(to: "Done")
-            selectedTaskId = "" // Clear selection as task is done
+            selectedTaskId = "" 
         }
         
         resetTimer()
@@ -91,7 +91,7 @@ class TimerViewModel: ObservableObject {
                 if let error = error {
                     print("Error updating task status: \(error.localizedDescription)")
                 } else if status == "Done" {
-                    // Add 200 XP and update streak when task is completed through timer
+                    
                     UserService.shared.addXP(uid: uid, amount: 200)
                     UserService.shared.updateStreak(uid: uid)
                 }
@@ -111,7 +111,7 @@ class TimerViewModel: ObservableObject {
             sessionData["taskId"] = taskId
         }
         
-        // 1. Save the individual session record
+        // Save the individual session record
         db.collection("users").document(uid).collection("timer_records").addDocument(data: sessionData) { error in
             if let error = error {
                 print("Error saving session: \(error.localizedDescription)")
@@ -120,7 +120,7 @@ class TimerViewModel: ObservableObject {
             }
         }
         
-        // 2. Update task metrics (Focus = study time, Break = break time)
+        // Update task metrics
         if !taskId.isEmpty {
             let taskRef = db.collection("users").document(uid).collection("tasks").document(taskId)
             let fieldToUpdate = (selectedMode == "Focus") ? "timeSpent" : "breakTimeSpent"

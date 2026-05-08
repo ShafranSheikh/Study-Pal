@@ -10,18 +10,16 @@ struct AddTaskView: View {
     @State private var taskType: String = "Assignment"
     @State private var priority: String = "Low"
 
-    // MARK: - Due Date State
-    /// The actual selected date (nil = no due date chosen)
     @State private var selectedDate: Date? = nil
-    /// Whether the inline calendar picker is expanded
+    
     @State private var showDatePicker: Bool = false
-    /// Temporary binding date used inside DatePicker (defaults to today)
+    
     @State private var pickerDate: Date = Date()
 
     let taskTypes = ["Assignment", "Exam", "Project", "Other"]
     let priorities = ["Low", "Medium", "High"]
 
-    // MARK: - Helpers
+    //Helpers
     private var formattedDate: String {
         guard let date = selectedDate else { return "" }
         let fmt = DateFormatter()
@@ -32,7 +30,7 @@ struct AddTaskView: View {
     private var displayDate: String {
         guard let date = selectedDate else { return "No due date" }
         let fmt = DateFormatter()
-        fmt.dateStyle = .medium   // e.g. "9 May 2026"
+        fmt.dateStyle = .medium
         return fmt.string(from: date)
     }
 
@@ -40,7 +38,7 @@ struct AddTaskView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
 
-                // MARK: Header
+                // Header
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "arrow.left")
@@ -54,7 +52,7 @@ struct AddTaskView: View {
                 Text("Add Task")
                     .font(.system(size: 32, weight: .bold))
 
-                // MARK: Form Fields
+                // Form Fields
                 VStack(alignment: .leading, spacing: 15) {
 
                     // Task Title
@@ -104,11 +102,11 @@ struct AddTaskView: View {
                         }
                     }
 
-                    // MARK: Due Date Picker
+                    // Due Date Picker
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Due date").font(.headline)
 
-                        // Tappable row that toggles the calendar
+                        
                         Button(action: {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                 showDatePicker.toggle()
@@ -139,13 +137,13 @@ struct AddTaskView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
 
-                        // Inline calendar — appears when tapped
+                        
                         if showDatePicker {
                             VStack(spacing: 0) {
                                 DatePicker(
                                     "",
                                     selection: $pickerDate,
-                                    in: Date()...,          // only future dates
+                                    in: Date()...,          
                                     displayedComponents: .date
                                 )
                                 .datePickerStyle(.graphical)
@@ -178,7 +176,7 @@ struct AddTaskView: View {
                             ))
                         }
 
-                        // Optional: manual text entry hint
+                
                         if !showDatePicker {
                             Text("Optional — tap the row above to pick from the calendar")
                                 .font(.caption)
@@ -209,7 +207,7 @@ struct AddTaskView: View {
                     }
                 }
 
-                // MARK: Action Buttons
+                // Action Buttons
                 VStack(spacing: 15) {
                     Button(action: {
                         viewModel.addTask(
@@ -217,7 +215,7 @@ struct AddTaskView: View {
                             description: description,
                             subject: subject,
                             taskType: taskType,
-                            dueDate: formattedDate,   // "dd/MM/yyyy" or "" if not set
+                            dueDate: formattedDate,  
                             priority: priority
                         )
                         dismiss()

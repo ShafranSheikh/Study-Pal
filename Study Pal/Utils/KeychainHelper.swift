@@ -18,7 +18,6 @@ class KeychainHelper {
         let status = SecItemAdd(query, nil)
         
         if status == errSecDuplicateItem {
-            // Item already exists, so update it
             let query = [
                 kSecAttrService: service,
                 kSecAttrAccount: account,

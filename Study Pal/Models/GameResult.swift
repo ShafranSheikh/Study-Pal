@@ -1,17 +1,12 @@
 import Foundation
-
-// MARK: - GameResult Model
-/// Represents a completed game session.
-/// Stored in Firestore as a dictionary to avoid Codable/Timestamp encoding issues.
-/// Path: users/{uid}/gameResults/{autoId}
 struct GameResult {
-    var gameType: String      // "memoryMatch", "speedClick", "mathRush", "colorMatch"
-    var score: Int            // Primary score for leaderboard
-    var moves: Int?           // Memory Match: move count
-    var timeElapsed: Int?     // Memory Match: seconds taken
-    var correctAnswers: Int?  // Math Rush / Color Match
-    var clicks: Int?          // Speed Click
-    var streak: Int?          // Math Rush best streak
+    var gameType: String     
+    var score: Int            
+    var moves: Int?           
+    var timeElapsed: Int?     
+    var correctAnswers: Int? 
+    var clicks: Int?          
+    var streak: Int?          
     let playedAt: Date
 
     init(
@@ -33,14 +28,11 @@ struct GameResult {
         self.playedAt = Date()
     }
 
-    // MARK: - Firestore Dictionary
-    /// Converts the model into a plain [String: Any] dictionary safe for Firestore addDocument(data:).
-    /// Date is stored as a Timestamp so Firestore can index and sort by it.
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "gameType": gameType,
             "score": score,
-            "playedAt": playedAt          // Firestore SDK auto-converts Date → Timestamp
+            "playedAt": playedAt          
         ]
         if let moves = moves           { data["moves"] = moves }
         if let timeElapsed = timeElapsed { data["timeElapsed"] = timeElapsed }

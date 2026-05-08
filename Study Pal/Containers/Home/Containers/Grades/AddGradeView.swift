@@ -1,7 +1,6 @@
 import SwiftUI
 
-// MARK: - AddGradeView
-/// Form to record a new grade entry and persist it to Firestore via GradeViewModel.
+
 struct AddGradeView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var viewModel: GradeViewModel
@@ -22,7 +21,6 @@ struct AddGradeView: View {
 
     let categories = ["Assignment", "Exam", "Quiz", "Project"]
 
-    // Preset subject colours the user can pick
     let colorOptions: [(name: String, color: Color)] = [
         ("Blue",   .blue),
         ("Green",  .green),
@@ -35,7 +33,6 @@ struct AddGradeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
 
-            // Back button
             Button { dismiss() } label: {
                 Image(systemName: "arrow.left")
                     .font(.title2.bold())
@@ -152,7 +149,6 @@ struct AddGradeView: View {
         .background(Color(UIColor.systemBackground))
     }
 
-    // MARK: - Helpers
     private var canSave: Bool {
         !subject.trimmingCharacters(in: .whitespaces).isEmpty &&
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -191,13 +187,11 @@ struct AddGradeView: View {
         }
     }
 
-    // Small helper to keep label styling DRY
     private func fieldLabel(_ text: String) -> some View {
         Text(text).bold()
     }
 }
 
-// MARK: - TextField style helper
 private extension View {
     func fieldStyle() -> some View {
         self

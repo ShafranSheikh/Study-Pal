@@ -1,14 +1,14 @@
 import Foundation
 
 struct UserProfile: Codable, Identifiable {
-    var id: String          // = Firebase Auth UID
+    var id: String          
     var firstName: String
     var lastName: String
     var email: String
     var dateOfBirth: String
     var gender: String
     var avatarIcon: String
-    var themeColor: String  // stored as hex string
+    var themeColor: String
     var level: Int
     var xp: Int
     var currentStreak: Int?
@@ -17,7 +17,6 @@ struct UserProfile: Codable, Identifiable {
 
     var fullName: String { "\(firstName) \(lastName)" }
 
-    // Default values for a new user
     static func defaultProfile(uid: String, firstName: String, lastName: String, email: String, dateOfBirth: String, gender: String) -> UserProfile {
         UserProfile(
             id: uid,

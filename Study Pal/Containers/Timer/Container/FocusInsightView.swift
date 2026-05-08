@@ -6,7 +6,7 @@ struct FocusInsightsView: View {
     
     var body: some View {
         VStack(spacing: 15) {
-            // Header with Back Button
+            // Header
             HStack {
                 Button(action: { dismiss() }) {
                     Image(systemName: "arrow.left")

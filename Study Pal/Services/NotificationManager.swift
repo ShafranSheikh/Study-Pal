@@ -1,20 +1,75 @@
 import Foundation
 import Combine
 import UserNotifications
+import SwiftUI
 
-/// Singleton manager for scheduling and handling local push notifications.
+
 class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
     
     @Published var isAuthorized: Bool = false
+    @Published var notifications: [AppNotification] = []
+    
+    private let notificationsKey = "app_notifications_key"
+    
+    var unreadCount: Int {
+        notifications.filter { !$0.isRead }.count
+    }
     
     private override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
         checkAuthorizationStatus()
+        loadNotifications()
     }
     
-    // MARK: - Permission Handling
+    //In-App Notification Management
+    
+    private func loadNotifications() {
+        if let data = UserDefaults.standard.data(forKey: notificationsKey),
+           let decoded = try? JSONDecoder().decode([AppNotification].self, from: data) {
+            self.notifications = decoded.sorted(by: { $0.date > $1.date })
+        }
+    }
+    
+    private func saveNotifications() {
+        if let encoded = try? JSONEncoder().encode(notifications) {
+            UserDefaults.standard.set(encoded, forKey: notificationsKey)
+        }
+    }
+    
+    func addInAppNotification(title: String, body: String) {
+        let newNotification = AppNotification(title: title, body: body)
+        DispatchQueue.main.async {
+            self.notifications.insert(newNotification, at: 0)
+            self.saveNotifications()
+        }
+    }
+    
+    func markAllAsRead() {
+        DispatchQueue.main.async {
+            for i in 0..<self.notifications.count {
+                self.notifications[i].isRead = true
+            }
+            self.saveNotifications()
+        }
+    }
+    
+    func clearAll() {
+        DispatchQueue.main.async {
+            self.notifications.removeAll()
+            self.saveNotifications()
+        }
+    }
+    
+    func removeNotifications(at offsets: IndexSet) {
+        DispatchQueue.main.async {
+            self.notifications.remove(atOffsets: offsets)
+            self.saveNotifications()
+        }
+    }
+    
+    //Permission Handling
     
     /// Request notification permission from the user.
     func requestAuthorization() {
@@ -37,22 +92,20 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
     }
     
-    // MARK: - Task Creation Notification
+    // Task Creation Notification
     
     /// Send a local push notification confirming a task was created.
-    /// - Parameters:
-    ///   - title: The task title
-    ///   - subject: The task subject
-    ///   - dueDate: The due date string (may be empty)
-    ///   - priority: The task priority
     func sendTaskCreatedNotification(title: String, subject: String, dueDate: String, priority: String) {
         let content = UNMutableNotificationContent()
         content.title = "📝 New Task Created"
-        content.body = buildTaskNotificationBody(title: title, subject: subject, dueDate: dueDate, priority: priority)
+        let body = buildTaskNotificationBody(title: title, subject: subject, dueDate: dueDate, priority: priority)
+        content.body = body
         content.sound = .default
         content.categoryIdentifier = "TASK_CREATED"
         
-        // Fire after a 1-second delay so the user sees it as a push notification
+
+        addInAppNotification(title: content.title, body: body)
+        
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         
         let request = UNNotificationRequest(
@@ -68,7 +121,7 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
     }
     
-    // MARK: - Helpers
+    //Helpers
     
     private func buildTaskNotificationBody(title: String, subject: String, dueDate: String, priority: String) -> String {
         var body = "\"\(title)\""
@@ -88,7 +141,6 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         return body
     }
     
-    // MARK: - UNUserNotificationCenterDelegate
     
     /// Show notifications even when the app is in the foreground.
     func userNotificationCenter(
@@ -105,7 +157,6 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        // Future: navigate to task detail when tapped
         completionHandler()
     }
 }
