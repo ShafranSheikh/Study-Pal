@@ -84,27 +84,42 @@ struct LoginView: View {
                 }
 
                 // Sign In Button
-                Button(action: {
-                    authViewModel.signIn(email: email, password: password)
-                }) {
-                    if authViewModel.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(50)
-                    } else {
-                        Text("Sign In")
-                            .fontWeight(.bold)
-                            .foregroundColor(.blue)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(50)
+                HStack(spacing: 15) {
+                    Button(action: {
+                        authViewModel.signIn(email: email, password: password)
+                    }) {
+                        if authViewModel.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(50)
+                        } else {
+                            Text("Sign In")
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(50)
+                        }
+                    }
+                    .disabled(authViewModel.isLoading)
+                    
+                    if authViewModel.isBiometricEnabled {
+                        Button(action: {
+                            authViewModel.signInWithBiometrics()
+                        }) {
+                            Image(systemName: BiometricManager.shared.getBiometricType() == .faceID ? "faceid" : "touchid")
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .frame(width: 55, height: 55)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                        }
                     }
                 }
-                .disabled(authViewModel.isLoading)
                 .padding(.top, 10)
 
                 // Divider
@@ -170,6 +185,16 @@ struct LoginView: View {
         }
         .alert(forgotMessage, isPresented: $showForgotAlert) {
             Button("OK", role: .cancel) {}
+        }
+        .onAppear {
+            if authViewModel.isBiometricEnabled && !authViewModel.isAuthenticated && !authViewModel.didJustSignOut {
+                // Check if we have credentials in keychain before prompting
+                if KeychainHelper.shared.read(service: "study-pal-auth", account: "email") != nil {
+                    authViewModel.signInWithBiometrics()
+                }
+            }
+            // Reset the flag so that next time (e.g. app restart) it can auto-login
+            authViewModel.didJustSignOut = false
         }
     }
 }

@@ -4,7 +4,6 @@ import FirebaseAuth
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var notificationsEnabled = true
-    @State private var biometricEnabled = true
 
     @State private var showAvatarSheet = false
     @State private var showThemeSheet = false
@@ -12,6 +11,8 @@ struct ProfileView: View {
     // Local state synced from Firestore profile
     @State private var selectedAvatar: String = "person.fill"
     @State private var selectedThemeColor: Color = .blue
+    @State private var showBiometricPasswordAlert = false
+    @State private var biometricPassword = ""
 
     // Derived display values from real profile
     private var displayName: String {
@@ -149,11 +150,34 @@ struct ProfileView: View {
                             VStack(spacing: 0) {
                                 ToggleRow(icon: "bell", title: "Notifications", subtitle: "Get deadline reminders", isOn: $notificationsEnabled)
                                 Divider().padding(.leading, 60)
-                                ToggleRow(icon: "faceid", title: "Biometric Lock", subtitle: "Use FaceID / TouchID", isOn: $biometricEnabled)
+                                ToggleRow(icon: "faceid", title: "Biometric Lock", subtitle: "Use FaceID / TouchID", isOn: Binding(
+                                    get: { authViewModel.isBiometricEnabled },
+                                    set: { newValue in
+                                        if newValue {
+                                            showBiometricPasswordAlert = true
+                                        } else {
+                                            authViewModel.isBiometricEnabled = false
+                                            authViewModel.clearKeychainCredentials()
+                                        }
+                                    }
+                                ))
                             }
                             .background(Color.white)
                             .cornerRadius(20)
                             .padding(.horizontal)
+                        }
+                        .alert("Enable Biometric Lock", isPresented: $showBiometricPasswordAlert) {
+                            SecureField("Enter your password", text: $biometricPassword)
+                            Button("Confirm") {
+                                authViewModel.enableBiometrics(password: biometricPassword) { success in
+                                    biometricPassword = ""
+                                }
+                            }
+                            Button("Cancel", role: .cancel) {
+                                biometricPassword = ""
+                            }
+                        } message: {
+                            Text("Please enter your password to securely enable FaceID / TouchID.")
                         }
 
                         // MARK: - Log Out Button

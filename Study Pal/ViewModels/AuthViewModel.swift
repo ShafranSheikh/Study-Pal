@@ -9,11 +9,21 @@ class AuthViewModel: ObservableObject {
     @Published var userProfile: UserProfile? = nil
     @Published var errorMessage: String? = nil
     @Published var isLoading: Bool = false
+    @Published var didJustSignOut: Bool = false
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private var profileListener: ListenerRegistration?
 
+    // MARK: - Biometric Settings
+    @Published var isBiometricEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isBiometricEnabled, forKey: "isBiometricEnabled")
+        }
+    }
+
     init() {
+        self.isBiometricEnabled = UserDefaults.standard.bool(forKey: "isBiometricEnabled")
+        
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
                 self?.currentUser = user
@@ -61,9 +71,76 @@ class AuthViewModel: ObservableObject {
                 } else {
                     self?.currentUser = result?.user
                     self?.isAuthenticated = true
+                    
+                    // If biometric is enabled, save credentials
+                    if self?.isBiometricEnabled == true {
+                        self?.saveCredentialsToKeychain(email: email, password: password)
+                    }
                 }
             }
         }
+    }
+    
+    // MARK: - Biometric Sign In
+    func signInWithBiometrics() {
+        // Pre-check credentials
+        guard KeychainHelper.shared.read(service: "study-pal-auth", account: "email") != nil,
+              KeychainHelper.shared.read(service: "study-pal-auth", account: "password") != nil else {
+            self.errorMessage = "No stored credentials found. Please sign in with password first."
+            return
+        }
+
+        BiometricManager.shared.authenticateUser { [weak self] success, error in
+            if success {
+                guard let emailData = KeychainHelper.shared.read(service: "study-pal-auth", account: "email"),
+                      let passwordData = KeychainHelper.shared.read(service: "study-pal-auth", account: "password"),
+                      let email = String(data: emailData, encoding: .utf8),
+                      let password = String(data: passwordData, encoding: .utf8) else {
+                    self?.errorMessage = "Error reading stored credentials."
+                    return
+                }
+                
+                self?.signIn(email: email, password: password)
+            } else if let error = error {
+                self?.errorMessage = error
+            }
+        }
+    }
+
+    func enableBiometrics(password: String, completion: @escaping (Bool) -> Void) {
+        guard let email = currentUser?.email else {
+            completion(false)
+            return
+        }
+        
+        isLoading = true
+        // Re-authenticate to verify password
+        Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                if error == nil {
+                    self?.isBiometricEnabled = true
+                    self?.saveCredentialsToKeychain(email: email, password: password)
+                    completion(true)
+                } else {
+                    self?.errorMessage = "Incorrect password. Failed to enable biometrics."
+                    completion(false)
+                }
+            }
+        }
+    }
+    
+    private func saveCredentialsToKeychain(email: String, password: String) {
+        if let emailData = email.data(using: .utf8),
+           let passwordData = password.data(using: .utf8) {
+            KeychainHelper.shared.save(emailData, service: "study-pal-auth", account: "email")
+            KeychainHelper.shared.save(passwordData, service: "study-pal-auth", account: "password")
+        }
+    }
+    
+    func clearKeychainCredentials() {
+        KeychainHelper.shared.delete(service: "study-pal-auth", account: "email")
+        KeychainHelper.shared.delete(service: "study-pal-auth", account: "password")
     }
 
     // MARK: - Sign Up (creates Firestore profile)
@@ -125,6 +202,7 @@ class AuthViewModel: ObservableObject {
             currentUser = nil
             userProfile = nil
             isAuthenticated = false
+            didJustSignOut = true
         } catch {
             errorMessage = "Failed to sign out. Please try again."
         }
