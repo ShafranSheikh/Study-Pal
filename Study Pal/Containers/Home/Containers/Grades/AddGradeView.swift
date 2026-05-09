@@ -12,7 +12,7 @@ struct AddGradeView: View {
     @State private var score = ""
     @State private var maxScore = ""
     @State private var target = ""
-    @State private var date = ""
+    @State private var date = Date()
     @State private var selectedColor: Color = .blue
 
     // UI state
@@ -90,8 +90,12 @@ struct AddGradeView: View {
 
                     // Date
                     fieldLabel("Date")
-                    TextField("dd-MM-yyyy", text: $date)
-                        .fieldStyle()
+                    DatePicker("Select Date", selection: $date, displayedComponents: .date)
+                        .labelsHidden()
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(UIColor.systemGray5).opacity(0.5))
+                        .cornerRadius(12)
 
                     // Subject colour
                     fieldLabel("Subject Colour")
@@ -164,6 +168,10 @@ struct AddGradeView: View {
         isSaving = true
         errorMessage = nil
 
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        let dateString = formatter.string(from: date)
+
         let entry = GradeEntry(
             subject:   subject.trimmingCharacters(in: .whitespaces),
             name:      name.trimmingCharacters(in: .whitespaces),
@@ -171,7 +179,7 @@ struct AddGradeView: View {
             score:     scoreVal,
             maxScore:  maxVal,
             target:    Double(target) ?? 0,
-            date:      date.trimmingCharacters(in: .whitespaces),
+            date:      dateString,
             colorHex:  selectedColor.toHex() ?? "#0000FF"
         )
 
@@ -181,6 +189,13 @@ struct AddGradeView: View {
                 if let error = error {
                     errorMessage = error.localizedDescription
                 } else {
+                    // Send notifications
+                    NotificationManager.shared.sendGradeCreatedNotification(
+                        subject: entry.subject,
+                        name: entry.name,
+                        score: entry.score,
+                        maxScore: entry.maxScore
+                    )
                     dismiss()
                 }
             }

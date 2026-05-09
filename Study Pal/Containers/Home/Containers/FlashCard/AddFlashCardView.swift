@@ -7,7 +7,7 @@ struct AddFlashCardView: View {
 
     @State private var question = ""
     @State private var subject = ""
-    @State private var dueDate = ""
+    @State private var dueDate = Date()
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
 
@@ -52,11 +52,12 @@ struct AddFlashCardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Due Date")
                     .font(.headline)
-                TextField("yyyy-mm-dd", text: $dueDate)
+                DatePicker("Select Date", selection: $dueDate, displayedComponents: .date)
+                    .labelsHidden()
                     .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(UIColor.systemGray5).opacity(0.5))
                     .cornerRadius(12)
-                    .keyboardType(.numbersAndPunctuation)
             }
 
             // error message
@@ -112,11 +113,15 @@ struct AddFlashCardView: View {
         isSaving = true
         errorMessage = nil
 
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateString = formatter.string(from: dueDate)
+
         viewModel.addCard(
             question: question.trimmingCharacters(in: .whitespaces),
             answer: "",
             subject: subject.trimmingCharacters(in: .whitespaces),
-            dueDate: dueDate.trimmingCharacters(in: .whitespaces)
+            dueDate: dateString
         ) { error in
             DispatchQueue.main.async {
                 isSaving = false

@@ -159,6 +159,13 @@ struct FlashCardsView: View {
                             showAnswerSheet = true
                         }
                     )
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            viewModel.deleteCard(card)
+                        } label: {
+                            Label("Delete Card", systemImage: "trash")
+                        }
+                    }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             viewModel.deleteCard(card)

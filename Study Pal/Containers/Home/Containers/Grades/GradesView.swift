@@ -97,6 +97,13 @@ struct GradesView: View {
         VStack(spacing: 15) {
             ForEach(viewModel.subjectSummaries) { summary in
                 SubjectCard(summary: summary)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            deleteSubject(summary)
+                        } label: {
+                            Label("Delete Subject", systemImage: "trash")
+                        }
+                    }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             deleteSubject(summary)

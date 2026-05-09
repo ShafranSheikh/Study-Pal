@@ -162,6 +162,20 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         scheduleNotification(content: content)
     }
 
+    /// Send a notification when a grade is successfully created.
+    func sendGradeCreatedNotification(subject: String, name: String, score: Double, maxScore: Double) {
+        let content = UNMutableNotificationContent()
+        content.title = "🎓 Grade Added"
+        let percentage = maxScore > 0 ? (score / maxScore) * 100 : 0
+        let body = "You've added a new grade for \(subject): \(name). Score: \(Int(score))/\(Int(maxScore)) (\(Int(percentage))%)"
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "GRADE_CREATED"
+        
+        addInAppNotification(title: content.title, body: body)
+        scheduleNotification(content: content)
+    }
+
     private func scheduleNotification(content: UNMutableNotificationContent) {
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(
