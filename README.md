@@ -48,7 +48,6 @@ Study Pal is a comprehensive iOS application designed to help students manage th
 - **Backend:** Firebase (Firestore, Authentication, Cloud Messaging)
 - **Architecture:** MVVM (Model-View-ViewModel)
 - **APIs & Frameworks:**
-  - `ActivityKit` (Live Activities)
   - `AppIntents` (Siri & Shortcuts)
   - `LocalAuthentication` (Face ID/Touch ID)
   - `UserNotifications` (Local & Push Notifications)
