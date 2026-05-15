@@ -103,4 +103,4 @@ Study Pal/
 ```
 
 
-Developed by [Mohamed Shafran](https://github.com/ShafranSheikh)
+Developed by [Mohamed Shafran - NIBM INDEX: COBSCCOMP242P-007 COVENTRY INDEX: 16114287](https://github.com/ShafranSheikh)
